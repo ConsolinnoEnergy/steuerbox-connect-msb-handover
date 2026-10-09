@@ -44,6 +44,29 @@ Alle Tests müssen grün sein — die Suite ist das Abnahmekriterium.
 
 Vollständige Begründungen: `docs/adr/`.
 
+## Optionale Konfiguration pro Umgebung (Qualification-Handshake, ADR-0002)
+
+Jede Umgebung (Staging / Produktion) hat **eigene** Endpunkte — der Austausch
+erfolgt einmals bilateral pro Paar (Hersteller ↔ MSB), verankert am DLMS
+Flag-Id (ADR-0016) und out-of-band verifiziert. Kein zentrales Registry,
+keine bilateralen Credential-Stores.
+
+| Rolle | Stellt bereit |
+|---|---|
+| **Well-known des EMS-Herstellers** | Der Hersteller stellt den `/.well-known/steuerbox-connect/v1`-Endpunkt bereit und veröffentlicht darin seine dedizierte Client-CA (pinned by the MSB via TOFU + TTL, ADR-0003/-0013). |
+| **MSB-API** | Der MSB stellt seine API-Basis-URL und zwei mTLS-Endpunkte bereit: die Serial-/ID-Abfrage (`GET /v1/serials/{serial|vpid}`) und die Übermittlung der EEBUS-Daten (`POST /v1/serials/{serial}/provisioning`). |
+
+Beispielhafte Umgebungstabelle (pro Umgebung / pro Paar):
+
+| Umgebung | Well-known URI (EMS-Hersteller) | MSB API Basis-URL |
+|---|---|---|
+| Staging | `https://ems-staging.example/.well-known/steuerbox-connect/v1` | `https://msb-staging.example` |
+| Produktion | `https://ems.example/.well-known/steuerbox-connect/v1` | `https://msb.example` |
+
+Zusätzlich vereinbart werden pro Paar: die beiden Endpunkte und Quotas
+(Rate-Limits, ADR-0010). Endpoint-Änderungen und Rotation laufen über den
+Ops-Contract (Anzeigepflicht), nicht über einen API-Endpunkt.
+
 ## Doku bauen
 
 ```bash
