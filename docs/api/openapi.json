@@ -1,0 +1,387 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "steuerbox-connect API",
+    "version": "0.4.0",
+    "description": "REST-API für das Zero-Touch-Pairing von EMS (HEMS) und Steuerbox (§14a EnWG).\n\nDie zwei MSB-Endpunkte (Discovery + Provisioning) sind **mTLS-only**: das Client-Zertifikat wird gegen die gepinnte Client-CA des EMS-Herstellers geprüft. Rate Limits sind Vertrag: `429` + `Retry-After`; Clients müssen `Retry-After` einhalten.\n\nDiscovery ist status-code basiert: `200` = found, `404` = not found (jeweils leerer Body); die kanonische Serial leitet der Client deterministisch aus der Query ab (Regel-S-Basis, ADR-0012). Transportfehler sind clientseitig `unknown`, nie `404` (ADR-0005).\n\nNormative Quellen: spec/discovery.yaml, spec/provisioning.yaml, spec/wellknown.schema.json. Diese JSON-Datei ist eine zusammengeführte Ansicht für Swagger UI."
+  },
+  "tags": [
+    {
+      "name": "Well-known (EMS-Hersteller)"
+    },
+    {
+      "name": "Discovery (MSB, mTLS)"
+    },
+    {
+      "name": "Provisioning (MSB, mTLS)"
+    }
+  ],
+  "paths": {
+    "/.well-known/steuerbox-connect/v1": {
+      "get": {
+        "operationId": "getWellknownDocument",
+        "summary": "Well-known-Dokument des EMS-Herstellers (Client-CA-Publikation)",
+        "tags": [
+          "Well-known (EMS-Hersteller)"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Das Well-known-Dokument.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WellKnownDocument"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Dokument an dieser URL nicht veröffentlicht."
+          }
+        }
+      }
+    },
+    "/v1/serials/{serial}": {
+      "get": {
+        "operationId": "discoverSerial",
+        "parameters": [
+          {
+            "name": "serial",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 4,
+              "maxLength": 32
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found — the serial belongs to this MSB. Empty body; the canonical serial is the Regel-S base of the query (deterministic derivation, not transmitted). Provisioning writes ONLY on this canonical serial.\n"
+          },
+          "404": {
+            "description": "Not found — unknown serial, anti-enumeration miss (query shorter than a portfolio serial) or killed serial. Empty body; no existence leak.\n"
+          },
+          "429": {
+            "description": "Rate limited. The Retry-After header is mandatory (seconds, numeric). Body: ErrorResponse with code `rate_limited`.\n",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "Seconds the client MUST wait before retrying."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "rateLimited": {
+                    "value": {
+                      "error": "rate_limited",
+                      "message": "quota exceeded; honor Retry-After"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "mtls": []
+          }
+        ],
+        "tags": [
+          "Discovery (MSB, mTLS)"
+        ],
+        "summary": "Discovery — gehört diese Serial/VPID zu diesem MSB? (200 found / 404 not found)"
+      }
+    },
+    "/v1/serials/{serial}/provisioning": {
+      "post": {
+        "operationId": "provisionHemsEndpoint",
+        "parameters": [
+          {
+            "name": "serial",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9]{4,32}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisioningRequest"
+              },
+              "examples": {
+                "provisioningRequest": {
+                  "$ref": "./examples/provisioning-request.json"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted — for both the first write (Created) and the idempotent replay of the same (serial, ship_id). The closed loop (accepted SHIP handshake in the LAN) proves the write reached the physical box.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptedResult"
+                },
+                "examples": {
+                  "accepted": {
+                    "value": {
+                      "status": "accepted"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The path serial is not the canonical serial from discovery. Body: ErrorResponse with code `not_canonical`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notCanonical": {
+                    "value": {
+                      "error": "not_canonical",
+                      "message": "provisioning requires the canonical serial from discovery"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Serial not in portfolio or killed (kill switch). Body: ErrorResponse with code `not_found`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notFound": {
+                    "value": {
+                      "error": "not_found",
+                      "message": "serial not in portfolio"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Write-once violation: the serial is already paired to a different ship_id (serial↔MSB never changes; MSB switch = physical box swap). Body: ErrorResponse with code `write_once_conflict`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "writeOnceConflict": {
+                    "value": {
+                      "error": "write_once_conflict",
+                      "message": "serial is already paired to a different ship_id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Either `box_mismatch` (supplied box_evidence does not match inventory; partial evidence counts as a mismatch) or `invalid_pairing_dataset` (pairing_dataset incomplete/invalid — e.g. qr_info outside the SHIP-Info-Datensatz shape `SHIP;…ENDSHIP;`) or `invalid_body` (request body is not a valid provisioning request).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "boxMismatch": {
+                    "value": {
+                      "error": "box_mismatch",
+                      "message": "observed box evidence does not match inventory"
+                    }
+                  },
+                  "invalidPairingDataset": {
+                    "value": {
+                      "error": "invalid_pairing_dataset",
+                      "message": "pairing_dataset incomplete or invalid"
+                    }
+                  },
+                  "invalidBody": {
+                    "value": {
+                      "error": "invalid_body",
+                      "message": "request body is not a valid provisioning request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited. The Retry-After header is mandatory (seconds, numeric). Body: ErrorResponse with code `rate_limited`.\n",
+            "headers": {
+              "Retry-After": {
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": "Seconds the client MUST wait before retrying."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "rateLimited": {
+                    "value": {
+                      "error": "rate_limited",
+                      "message": "quota exceeded; honor Retry-After"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "mtls": []
+          }
+        ],
+        "tags": [
+          "Provisioning (MSB, mTLS)"
+        ],
+        "summary": "Provisioning — EEBUS-Daten des EMS übermitteln"
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "mtls": {
+        "type": "mutualTLS"
+      }
+    },
+    "schemas": {
+      "ProvisioningRequest": {
+        "type": "object",
+        "required": [
+          "pairing_dataset"
+        ],
+        "properties": {
+          "pairing_dataset": {
+            "$ref": "./pairing_dataset.schema.json"
+          },
+          "box_evidence": {
+            "type": "object",
+            "description": "In-LAN observed Steuerbox ship_id + ski (client SHOULD send; server MUST accept without it). Server SHOULD verify against inventory: mismatch → 422 box_mismatch + operator alarm; supplied but unverifiable (no inventory entry) → accepted with operator alarm — never a silent ignore. Partial evidence (only one of ship_id/ski) counts as mismatch.\n",
+            "properties": {
+              "ship_id": {
+                "type": "string"
+              },
+              "ski": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "AcceptedResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted"
+            ]
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "error",
+          "message"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "rate_limited"
+            ],
+            "description": "Machine-readable error code.\n- `rate_limited` (429): quota exceeded; honor Retry-After.\n"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WellKnownDocument": {
+        "type": "object",
+        "required": [
+          "dlms_manufacturer_id",
+          "client_ca",
+          "contact"
+        ],
+        "properties": {
+          "dlms_manufacturer_id": {
+            "type": "string",
+            "description": "DLMS manufacturer flag id (IEC 62056, publicly registered by the DLMS UA), e.g. CEG for an example manufacturer",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "client_ca": {
+            "type": "object",
+            "required": [
+              "pem",
+              "scope"
+            ],
+            "properties": {
+              "pem": {
+                "type": "string",
+                "contentEncoding": "base64"
+              },
+              "scope": {
+                "const": "steuerbox-connect-api"
+              },
+              "not_before": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "not_after": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "contact": {
+            "type": "string"
+          }
+        },
+        "description": "Well-known-Dokument: DLMS-Hersteller-ID, dedizierte Client-CA (base64-PEM, scope steuerbox-connect-api, Gültigkeitsfenster) und Kontakt."
+      }
+    }
+  }
+}

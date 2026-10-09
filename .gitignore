@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+
+# Rust
+target/
+Cargo.lock.orig
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Secrets / key material — niemals committen
+*.key
+*private*.pem
+test/ca/out/
+.env

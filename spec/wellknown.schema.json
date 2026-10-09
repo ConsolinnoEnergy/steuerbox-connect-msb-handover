@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/wellknown.schema.json",
+  "title": "steuerbox-connect well-known document",
+  "type": "object",
+  "required": ["dlms_manufacturer_id", "client_ca", "contact"],
+  "properties": {
+    "dlms_manufacturer_id": {
+      "type": "string",
+      "description": "DLMS manufacturer flag id (IEC 62056, publicly registered by the DLMS UA), e.g. CEG for an example manufacturer",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "client_ca": {
+      "type": "object",
+      "required": ["pem", "scope"],
+      "properties": {
+        "pem": { "type": "string", "contentEncoding": "base64" },
+        "scope": { "const": "steuerbox-connect-api" },
+        "not_before": { "type": "string", "format": "date-time" },
+        "not_after": { "type": "string", "format": "date-time" }
+      }
+    },
+    "contact": { "type": "string" }
+  }
+}

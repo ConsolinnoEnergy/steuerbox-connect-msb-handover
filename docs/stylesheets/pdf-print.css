@@ -1,0 +1,89 @@
+/* Print/PDF styles — used only by the PDF export build (mkdocs.print.yml).
+   The regular Pages site loads mermaid-zoom.css instead. */
+
+@media print {
+  /* No interactive chrome in the PDF. */
+  .mermaid-zoom-btn,
+  header.md-header,
+  nav.md-tabs,
+  .md-sidebar,
+  .md-top,
+  .md-footer,
+  .md-content__button,
+  .toc-permalink {
+    display: none !important;
+  }
+
+  .md-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Material's viewport-height layout forces a second (empty) print page —
+     let content flow naturally. */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .md-main,
+  .md-main__inner,
+  .md-content,
+  .md-content__inner,
+  .md-typeset {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .md-typeset h1,
+  .md-typeset h2 {
+    break-after: avoid;
+  }
+
+  /* --- Title page ----------------------------------------------------- */
+  .print-titlepage {
+    text-align: center;
+    padding-top: 50mm;
+    font-size: 1.1rem;
+  }
+  .print-titlepage img {
+    max-width: 70mm;
+    margin-bottom: 20mm;
+  }
+  .print-titlepage h1 {
+    font-size: 2.4rem;
+    border-bottom: none;
+    margin-bottom: 8mm;
+  }
+
+  /* --- Landscape full-page mermaid diagram (Prozess) -------------------
+     Named page: Chromium honours `page:` + `@page ... { size: landscape }`
+     since ~M116, which headless-Chrome print-to-PDF picks up. */
+  @page {
+    size: A4 portrait;
+    margin: 18mm;
+  }
+
+  @page mermaid-page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+
+  .md-typeset .mermaid {
+    page: mermaid-page;
+    break-before: page;
+    break-after: page;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180mm; /* fill the landscape content area vertically */
+  }
+
+  /* Mermaid sets an inline max-width in px — override so the diagram
+     scales up to the full landscape page while keeping its aspect ratio. */
+  .md-typeset .mermaid svg {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 180mm !important;
+  }
+}

@@ -1,0 +1,43 @@
+/* Zoom button + fullscreen view for mermaid diagrams */
+.mermaid-zoom-wrap {
+  position: relative;
+}
+.mermaid-zoom-btn {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 5;
+  border: 1px solid var(--md-default-fg-color--lightest, #ccc);
+  border-radius: 0.2rem;
+  background: var(--md-default-bg-color, #fff);
+  color: var(--md-default-fg-color--light, #555);
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.mermaid-zoom-btn:hover {
+  color: var(--md-primary-fg-color, #00695c);
+}
+:fullscreen .mermaid-zoom-btn {
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.1rem;
+  padding: 0.4rem 0.6rem;
+}
+
+/* Fullscreen: let the diagram use the whole viewport */
+:fullscreen .mermaid,
+:fullscreen .mermaid svg {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+}
+:fullscreen .mermaid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--md-default-bg-color, #fff);
+}

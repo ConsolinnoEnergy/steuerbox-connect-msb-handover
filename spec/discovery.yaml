@@ -1,0 +1,73 @@
+openapi: 3.1.0
+info:
+  title: steuerbox-connect — Discovery API (MSB)
+  version: 0.3.0
+  description: >
+    NORMATIVE. Tolerant serial/VPID discovery. The answer is status-code based:
+    200 = found, 404 = not found, both with an empty body. The client derives the
+    canonical serial itself (Regel-S base of the query — deterministic, ADR-0012).
+
+    Query shorter than a portfolio serial MUST answer 404 (anti-enumeration).
+    Transport failures are never 404 on the client side (tri-state, ADR-0005):
+    transport failure, TLS rejection or any non-200/404 answer is `unknown`.
+
+    Kill switch: a killed serial answers exactly like an unknown serial (404) and
+    MUST NOT leak that the serial ever existed.
+
+    Rate limits are contract (ADR-0010: discovery is the most abusable endpoint):
+    429 + Retry-After header (seconds, numeric) is mandatory. A 429 without
+    Retry-After is a server contract violation; clients MUST NOT retry with a
+    fabricated delay. Clients MUST honor Retry-After.
+paths:
+  /v1/serials/{serial}:
+    get:
+      operationId: discoverSerial
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          schema: { type: string, minLength: 4, maxLength: 32 }
+      responses:
+        "200":
+          description: >
+            Found — the serial belongs to this MSB. Empty body; the canonical
+            serial is the Regel-S base of the query (deterministic derivation,
+            not transmitted). Provisioning writes ONLY on this canonical serial.
+        "404":
+          description: >
+            Not found — unknown serial, anti-enumeration miss (query shorter than
+            a portfolio serial) or killed serial. Empty body; no existence leak.
+        "429":
+          description: >
+            Rate limited. The Retry-After header is mandatory (seconds, numeric).
+            Body: ErrorResponse with code `rate_limited`.
+          headers:
+            Retry-After:
+              required: true
+              schema: { type: integer, minimum: 1 }
+              description: Seconds the client MUST wait before retrying.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+              examples:
+                rateLimited:
+                  value:
+                    error: rate_limited
+                    message: quota exceeded; honor Retry-After
+      security:
+        - mtls: []
+components:
+  securitySchemes:
+    mtls: { type: mutualTLS }
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          enum: [rate_limited]
+          description: |
+            Machine-readable error code.
+            - `rate_limited` (429): quota exceeded; honor Retry-After.
+        message: { type: string }

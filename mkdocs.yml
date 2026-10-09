@@ -1,0 +1,63 @@
+site_name: steuerbox-connect-msb-handover
+site_description: >-
+  Bilateraler Zero-Touch-Bootstrap zwischen EMS-Herstellern und
+  Messstellenbetreibern für Steuerboxen (§14a EnWG) — Implementierungspaket für MSB-Plattformen.
+# set these to your pages host / repo URL (no provider-specific defaults here)
+site_url: https://example.invalid/steuerbox-connect-msb-handover
+repo_url: ''
+repo_name: steuerbox-connect-msb-handover
+docs_dir: docs
+exclude_docs: |
+  README.md
+
+nav:
+  - Überblick: index.md
+  - Prozess (10 Schritte): prozess.md
+  - Für EMS-Hersteller: rolle/ems-hersteller.md
+  - Für Messstellenbetreiber: rolle/msb.md
+  - REST-API-Referenz: api.md
+  - Spezifikation: spec/index.md
+  - Sicherheit & Trust: security.md
+  - Testen & Konformanz: testen.md
+  - Glossar: glossar.md
+  - ADRs: adr/index.md
+  - Vertiefung:
+    - threat-model.md
+    - discovery.md
+    - enrollment.md
+
+theme:
+  name: material
+  language: de
+  features:
+    - content.code.copy
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+  palette:
+    - scheme: default
+      primary: teal
+
+extra_javascript:
+  - javascripts/mermaid-zoom.js
+extra_css:
+  - stylesheets/mermaid-zoom.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight
+  - pymdownx.snippets
+
+strict: true

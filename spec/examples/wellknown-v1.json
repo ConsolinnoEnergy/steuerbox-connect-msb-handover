@@ -1,0 +1,11 @@
+{
+  "$id": "https://example.org/wellknown.example.json",
+  "dlms_manufacturer_id": "CEG",
+  "client_ca": {
+    "pem": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCg==",
+    "scope": "steuerbox-connect-api",
+    "not_before": "2026-09-25T11:17:03Z",
+    "not_after": "2026-10-25T11:17:03Z"
+  },
+  "contact": "ops@example-ems.example"
+}

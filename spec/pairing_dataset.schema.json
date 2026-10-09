@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/pairing_dataset.schema.json",
+  "title": "pairing_dataset",
+  "type": "object",
+  "required": ["ship_id", "ski", "qr_info"],
+  "properties": {
+    "ship_id": {
+      "type": "string",
+      "description": "HEMS ship_id i:<IANA-PEN>_u:<VPID> — the VPID part IS the HEMS serial, so no separate serial field exists (two serials, never mixed: the path carries the Steuerbox serial)."
+    },
+    "ski": { "type": "string" },
+    "qr_info": {
+      "type": "string",
+      "description": "SHIP-Info-Datensatz from the EEBUS QR content (SHIP;SKI:…;ID:…;FPH256:…;SPSEC:…;ENDSHIP;) — carries the FNN credential fingerprint and the SPSEC security code; mTLS is the secret's transport (ADR-0008/-0017), the MSB forwards it only via the box admin channel and never logs it. No separate fph or base_uri field.",
+      "pattern": "^SHIP;.+ENDSHIP;$"
+    }
+  }
+}
