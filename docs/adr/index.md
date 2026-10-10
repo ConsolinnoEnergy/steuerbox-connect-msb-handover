@@ -24,9 +24,9 @@ Template: **Nummer · Status · Context · Decision · Consequences.**
 | [0013](0013-wellknown-wire-format.md) | Well-known wire format — base64 `client_ca.pem`, validity window | Accepted (amends ADR-0003) |
 | [0014](0014-rsa-marvin-accepted-risk.md) | Accepted residual risk: `rsa` crate (RUSTSEC-2023-0071, Marvin Attack) | Accepted (2026-09-25) |
 | [0015](0015-msb-core-library.md) | `msb-core` embeddable library + `MsbStore` integration seam for MSB backends | Accepted (2026-09-25) |
-| [0016](0016-dlms-manufacturer-id.md) | DLMS manufacturer flag id (`dlms_manufacturer_id`, z.B. `CEG`) instead of self-chosen `manufacturer_id` | Superseded by ADR-0018 (2026-10-10) |
+| [0016](0016-manufacturer-id.md) | Publicly registered manufacturer identifier instead of self-chosen `manufacturer_id` | Superseded by ADR-0018 (2026-10-10) |
 | [0017](0017-slim-provisioning-payload.md) | Slim provisioning payload — `pairing_dataset {ship_id, ski, qr_info}` only | Accepted |
-| [0018](0018-iana-pen-fleet-binding.md) | `iana_pen` in the well-known document replaces the DLMS flag id; fleet binding on provisioning (`422 fleet_mismatch`) | Accepted (2026-10-10, supersedes ADR-0016) |
+| [0018](0018-iana-pen-fleet-binding.md) | `iana_pen` in the well-known document replaces the registered manufacturer identifier; fleet binding on provisioning (`422 fleet_mismatch`) | Accepted (2026-10-10, supersedes ADR-0016) |
 
 ## Themen, die einen neuen ADR erfordern
 
