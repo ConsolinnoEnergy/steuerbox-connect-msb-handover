@@ -1,5 +1,21 @@
 # Steuerbox-Connect — MSB-Implementierungspaket
 
+## Präambel
+
+Dieses Paket ist eine **Diskussionsgrundlage und Vorlage** für alle Akteure der Branche —
+Messstellenbetreiber (MSB) und EMS-Hersteller gleichermaßen. Es beschreibt einen
+offenen, bilateralen Zero-Touch-Bootstrap für §14a EnWG Steuerboxen und stellt dafür
+Spezifikation, Referenz-Implementierung und Konformanz-Suite bereit. Die Vorlage ist
+bewusst so gehalten, dass sie angepasst, übernommen und weiterentwickelt werden kann:
+jeder Akteur darf sie nutzen, verändern und in eigenen Produkten einsetzen. Damit
+sollen Diskussions- und Implementierungskosten sinken und ein gemeinsames,
+herstellerübergreifendes Verständnis der Schnittstellen entstehen.
+
+Die Vorlage wird **Open Source unter der MIT-Lizenz ohne Royalties** veröffentlicht
+(siehe [`LICENSE`](LICENSE)). Die MIT-Lizenz erlaubt die Nutzung, Vervielfältigung,
+Veränderung und Weitergabe — auch kommerziell — bei Angabe des Urheberrechtsvermerks;
+es fallen keine Lizenzgebühren an.
+
 Referenzpaket für MSB-Plattformen zur Implementierung der beiden mTLS-Endpunkte des
 bilateralen Zero-Touch-Bootstraps für §14a EnWG Steuerboxen:
 
@@ -82,5 +98,7 @@ mkdocs serve   # aus dem Repo-Root
 
 ## Rechtliches
 
-Apache-2.0. Die Referenz-Implementierung ist quelloffen; die Konformanz-Suite darf frei
-für die eigene Abnahme eingesetzt und erweitert werden.
+MIT-Lizenz, ohne Royalties (siehe [`LICENSE`](LICENSE)). Die Referenz-Implementierung
+ist quelloffen; die Konformanz-Suite darf frei für die eigene Abnahme eingesetzt und
+erweitert werden. Nutzung, Veränderung und kommerzieller Einsatz sind unter Wahrung
+des Urheberrechtsvermerks gestattet — es fallen keine Lizenzgebühren an.
