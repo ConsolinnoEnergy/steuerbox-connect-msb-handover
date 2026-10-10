@@ -16,7 +16,7 @@ sequenceDiagram
     participant SB as Steuerbox (via SMGW)
 
     Note over EMS-H,MSB: einmalige Qualifikation
-    EMS-H->>MSB: Qualifikation zur EEBUS-Kopplung (DLMS-Flag-ID-Anker)
+    EMS-H->>MSB: Qualifikation zur EEBUS-Kopplung (IANA-PEN-Anker, ADR-0018)
     EMS-H->>MSB: well-known URI
     MSB->>WK: GET /.well-known/steuerbox-connect/v1
     MSB->>MSB: pinnt Client-CA (TOFU + TTL)
@@ -38,7 +38,7 @@ sequenceDiagram
 ## Die Schritte im Detail
 
 1. **Qualifikation (einmalig pro Hersteller):** MSB und EMS-Hersteller führen die bilaterale
-   Qualifikation zur EEBUS-Kopplung und -Steuerung durch (DLMS-Flag-ID als Anker). Der
+   Qualifikation zur EEBUS-Kopplung und -Steuerung durch (IANA PEN als Anker, ADR-0018). Der
    Hersteller teilt seine well-known URI mit, der MSB seine API-Basis-URL samt der beiden
    Endpunkte und Quoten.
 2. **Well-known des EMS-Herstellers:** Der Hersteller stellt den

@@ -1,12 +1,12 @@
 # ADR-0002: Bilateral qualification handshake
 
 - **Status:** Accepted (amended 2026-09-25: EEBUS Cert-ID anchor replaced by the
-  DLMS manufacturer flag id, see ADR-0016)
+  IANA PEN of the manufacturer, see ADR-0018)
 - **Context:** ~4 MSB service providers × ~6 EMS manufacturers make a central registry
   unnecessary; bilateral onboarding must still be unambiguous and auditable.
 - **Decision:** One-time bilateral qualification per pair: the manufacturer shares its
   well-known URI, the MSB shares API base URL, the two endpoints and quotas. The anchor
-  is the manufacturer's **DLMS flag id** (publicly registered, ADR-0016 — e.g. `CEG`),
+  is the manufacturer's **IANA PEN** (publicly registered, ADR-0018 — e.g. `12345`),
   combined with out-of-band identity verification (personally/verified channel). No
   central registry, no bilateral credential stores.
 - **Consequences:** Coupling scales as O(n·m) with URL dedupe (~4–6 queries). Rotation

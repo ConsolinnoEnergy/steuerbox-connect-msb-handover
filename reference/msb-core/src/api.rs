@@ -35,6 +35,9 @@ pub struct MsbState {
     pub store: Arc<dyn MsbStore>,
     pub rate_limiter: RateLimiter,
     pub msb_id: String,
+    /// IANA PEN of the pinned EMS manufacturer (well-known doc, ADR-0018 fleet
+    /// binding). Provisioning `pairing_dataset.ship_id` must carry this PEN.
+    pub iana_pen: String,
     pub box_admin: Arc<dyn admin::BoxAdminAdapter>,
     pub admin_token: String,
     pub tls_cert: PathBuf,
@@ -59,6 +62,7 @@ impl MsbState {
             store,
             rate_limiter: RateLimiter::new(rate_limit),
             msb_id: msb_id.into(),
+            iana_pen: String::new(),
             box_admin,
             admin_token: admin_token.into(),
             tls_cert: PathBuf::new(),
@@ -67,6 +71,15 @@ impl MsbState {
             tls_cfg: RwLock::new(None),
             pins_fp: AtomicU64::new(0),
         }
+    }
+
+    /// Configure the IANA PEN fleet binding (ADR-0018): the PEN the MSB pinned from
+    /// the manufacturer's well-known document. Provisioning payloads whose
+    /// `pairing_dataset.ship_id` carries a different PEN are rejected `422
+    /// fleet_mismatch`. An embedding MSB fills this from its pinned well-known doc.
+    pub fn with_iana_pen(mut self, iana_pen: impl Into<String>) -> Self {
+        self.iana_pen = iana_pen.into();
+        self
     }
 
     /// Configure the mTLS material for [`serve`]/[`serve_tls`] (sim-LE server identity
@@ -252,6 +265,30 @@ async fn provision(
             ),
         )
             .into_response();
+    }
+
+    // Fleet binding (ADR-0018): the IANA PEN inside pairing_dataset.ship_id
+    // (`i:<PEN>_u:<VPID>`) must match the iana_pen the MSB pinned from the
+    // manufacturer's well-known document — an MSB never accepts foreign-fleet
+    // pairing data. Mismatch → 422 + operator alarm, never a silent ignore.
+    if !state.iana_pen.is_empty() {
+        match matcher::iana_pen(&dataset.ship_id) {
+            Some(pen) if pen == state.iana_pen => {}
+            _ => {
+                tracing::warn!(
+                    serial,
+                    "ship_id IANA PEN does not match well-known iana_pen — operator alarm (422 fleet_mismatch)"
+                );
+                return (
+                    StatusCode::UNPROCESSABLE_ENTITY,
+                    error_body(
+                        "fleet_mismatch",
+                        "ship_id belongs to a different manufacturer fleet",
+                    ),
+                )
+                    .into_response();
+            }
+        }
     }
 
     let record = PairingRecord {
@@ -633,5 +670,52 @@ mod embed_tests {
             .await
             .unwrap();
         assert_eq!(res.status(), StatusCode::ACCEPTED);
+    }
+
+    // ADR-0018 fleet binding: the IANA PEN inside pairing_dataset.ship_id must
+    // match the well-known iana_pen — foreign-fleet payloads are 422 fleet_mismatch.
+    #[tokio::test]
+    async fn fleet_binding_rejects_foreign_iana_pen() {
+        let app = api_router(Arc::new(state_with_custom_db().with_iana_pen("12345")));
+        let req = |ship_id: &str| {
+            let mut r = axum::http::Request::builder()
+                .method("POST")
+                .uri("/v1/serials/SNTEST0001/provisioning")
+                .header("content-type", "application/json")
+                .body(axum::body::Body::from(
+                    serde_json::to_vec(&json!({
+                        "pairing_dataset": {
+                            "ship_id": ship_id,
+                            "ski": "ski-hems",
+                            "qr_info": "SHIP;SKI:ski-hems;ID:hems-id;FPH256:fph;ENDSHIP;"
+                        },
+                        "box_evidence": {"ship_id": "ship-x", "ski": "ski-x"}
+                    }))
+                    .unwrap(),
+                ))
+                .unwrap();
+            r.extensions_mut()
+                .insert(ClientFingerprint("testfp".into()));
+            r
+        };
+
+        // foreign PEN → 422 fleet_mismatch + operator alarm
+        let res = app.clone().oneshot(req("i:0002_u:HEMS0001")).await.unwrap();
+        assert_eq!(res.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let bytes = axum::body::to_bytes(res.into_body(), 1024).await.unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(body["error"], "fleet_mismatch");
+
+        // own fleet PEN → accepted
+        let res = app
+            .clone()
+            .oneshot(req("i:12345_u:HEMS0001"))
+            .await
+            .unwrap();
+        assert_eq!(res.status(), StatusCode::ACCEPTED);
+
+        // ship_id outside the SHIP-ID shape → fleet_mismatch too (never silent)
+        let res = app.oneshot(req("ship-without-pen")).await.unwrap();
+        assert_eq!(res.status(), StatusCode::UNPROCESSABLE_ENTITY);
     }
 }

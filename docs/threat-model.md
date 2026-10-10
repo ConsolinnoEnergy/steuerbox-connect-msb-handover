@@ -47,7 +47,7 @@ Die normativen Gegenmaßnahmen sind als e2e-Szenarien verdrahtet
 
 TOFU-Pinning vertraut dem **ersten** Well-known-Fetch. Gegenmaßnahmen gegen den
 First-Fetch-Angriff: Qualifikations-Handshake außer Band (Hersteller teilt URI
-persönlich/verifiziert mit), DLMS-Flag-ID als Identitäts-Anker (ADR-0016), TTL + Re-Fetch,
+persönlich/verifiziert mit), IANA PEN als Flotten-Anker (ADR-0018), TTL + Re-Fetch,
 Kill-Switch. Verbleibendes Risiko wird im Ops-Vertrag (Informationspflicht bei
 Endpunktwechsel) getragen — ein Austausch über Kanäle außerhalb dieses Systems ist
 Teil des Prozesses, nicht der Software.

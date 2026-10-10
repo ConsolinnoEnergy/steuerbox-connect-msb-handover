@@ -11,9 +11,13 @@ bilateralen Zero-Touch-Bootstraps für §14a EnWG Steuerboxen:
 | Pfad | Inhalt |
 |---|---|
 | `spec/` | **Normativ:** OpenAPI 3.1 (`discovery.yaml`, `provisioning.yaml`), JSON-Schemas (`wellknown.schema.json`, `pairing_dataset.schema.json`), Beispiele |
-| `conformance/` | **Abnahme:** black-box pytest-Suite — läuft gegen jede MSB-Implementierung, prüft mTLS-only, Tri-State, Anti-Enumeration, Idempotenz, Rate-Limits, box_evidence, Error-Taxonomie |
-| `docs/` | Deutsche Implementierungsdoku (mkdocs-material), ADR-0001 … ADR-0017 (bindende Entscheidungen) |
-| `reference/` | Optionaler Rust-Referenz-Code (`msb-core`, `msb`) — tolerant matcher, evidence verifier, pin store. **So kann es aussehen**, nicht als Kopiervorlage |
+| `conformance/` | **Abnahme:** black-box pytest-Suite — läuft gegen jede MSB-Implementierung, prüft mTLS-only, Tri-State, Anti-Enumeration, Idempotenz, Rate-Limits, box_evidence, Fleet-Binding, Error-Taxonomie |
+| `docs/` | Deutsche Implementierungsdoku (mkdocs-material), ADR-0001 … ADR-0018 (bindende Entscheidungen) |
+| `reference/` | Optionaler Rust-Referenz-Code (`msb-core`, `msb`) — tolerant matcher, evidence verifier, pin store, fleet binding. **So kann es aussehen**, nicht als Kopiervorlage |
+
+> **Beispiel-IANA-PEN:** `12345` — die Beispiele, Schemas und die Conformance-Suite
+> verwenden diese Beispiel-PEN. Ihre echte IANA PEN konfigurieren Sie selbst
+> (`WK_IANA_PEN` / `MSB_IANA_PEN` bzw. `CONF_IANA_PEN` in der Conformance-Suite).
 
 ## Schnellstart (Abnahme)
 
@@ -24,6 +28,7 @@ pip install -r requirements.txt
 export CONF_BASE_URL=https://ihre-staging-url
 export CONF_CERT=/pfad/zum/client-cert.pem
 export CONF_KEY=/pfad/zum/client-key.pem
+export CONF_IANA_PEN=12345   # die IANA PEN, die Ihr MSB aus unserem Well-known-Dokument gepinnt hat
 pytest tests/ -v
 ```
 
@@ -40,15 +45,16 @@ Alle Tests müssen grün sein — die Suite ist das Abnahmekriterium.
 - **box_evidence:** optional in der Payload; bei Mismatch → `422 box_mismatch` + Operator-Alarm (ADR-0007).
 - **Secret-Transport:** der SHIP-Info-Datensatz inkl. SPSEC reist ausschließlich via mTLS; nie in Logs, Traces oder Fehlerkörpern (ADR-0008/-0017).
 - **Rate-Limits sind Vertrag:** `429` + `Retry-After`, Clients honorieren (ADR-0010).
-- **Well-known:** `/.well-known/steuerbox-connect/v1` — MSB pinnt die dedizierte Client-CA via TOFU + TTL (ADR-0003/-0013).
+- **Well-known:** `/.well-known/steuerbox-connect/v1` — MSB pinnt die dedizierte Client-CA via TOFU + TTL (ADR-0003/-0013) und daraus die `iana_pen` des Herstellers (ADR-0018).
+- **Fleet-Binding:** die IANA PEN in `pairing_dataset.ship_id` (`i:<PEN>_u:<VPID>`) MUSS der im Well-known-Dokument veröffentlichten `iana_pen` entsprechen — Fremd-Flotten-Daten sind `422 fleet_mismatch` + Operator-Alarm, nie ein stiller Ignore (ADR-0018).
 
 Vollständige Begründungen: `docs/adr/`.
 
 ## Optionale Konfiguration pro Umgebung (Qualification-Handshake, ADR-0002)
 
 Jede Umgebung (Staging / Produktion) hat **eigene** Endpunkte — der Austausch
-erfolgt einmals bilateral pro Paar (Hersteller ↔ MSB), verankert am DLMS
-Flag-Id (ADR-0016) und out-of-band verifiziert. Kein zentrales Registry,
+erfolgt einmals bilateral pro Paar (Hersteller ↔ MSB), verankert an der IANA
+PEN des Herstellers (ADR-0018) und out-of-band verifiziert. Kein zentrales Registry,
 keine bilateralen Credential-Stores.
 
 | Rolle | Stellt bereit |

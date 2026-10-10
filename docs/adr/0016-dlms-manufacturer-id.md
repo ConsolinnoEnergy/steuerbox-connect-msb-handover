@@ -1,6 +1,7 @@
 # ADR-0016: DLMS manufacturer flag id instead of self-chosen `manufacturer_id`
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0018 (DLMS flag id removed — the herstellerübergreifende
+  Identifikationsnummer is not yet in use; IANA PEN takes over as the fleet anchor)
 - **Datum:** 2026-09-25
 - **Kontext:** Well-known wire format (amends ADR-0003)
 

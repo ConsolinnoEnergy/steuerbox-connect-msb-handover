@@ -4,8 +4,8 @@
 - **Context:** The MSB must validate mTLS client certificates issued by each EMS
   manufacturer without manual certificate distribution.
 - **Decision:** The EMS manufacturer publishes `/.well-known/steuerbox-connect/v1`
-  containing `dlms_manufacturer_id` (DLMS flag id, ADR-0016), `client_ca` (public part of a
-  **dedicated** sub-CA, `scope: steuerbox-connect-api`) and `contact`. The DLMS flag id (ADR-0016)
+  containing `iana_pen` (IANA PEN of the manufacturer, ADR-0018), `client_ca` (public part of a
+  **dedicated** sub-CA, `scope: steuerbox-connect-api`) and `contact`. The IANA PEN (ADR-0018)
   are exchanged bilaterally during the qualification handshake (ADR-0002), not
   published in the well-known document.
   The MSB fetches the document, pins the CA (TOFU + TTL) and validates every client

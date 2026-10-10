@@ -19,7 +19,7 @@ drei Feldern:
 
 | Feld | Pflicht | Bedeutung |
 |---|---|---|
-| `dlms_manufacturer_id` | ja | Ihre DLMS-Flag-ID (IEC 62056), z.B. `CEG` (ADR-0016) |
+| `iana_pen` | ja | Ihre IANA PEN (z.B. `12345`); MUSS mit der PEN in Ihren SHIP-IDs übereinstimmen (ADR-0018) |
 | `client_ca` | ja | Base64-PEM Ihrer dedizierten Client-Sub-CA (`scope: steuerbox-connect-api`) + Gültigkeitsfenster `not_before`/`not_after` (ADR-0013) |
 | `contact` | ja | Kontakt für MSBs (Rotation, Störungen) |
 
@@ -40,7 +40,7 @@ die kennt nur der MSB.
 
 Für jeden MSB, mit dem Sie koppeln wollen:
 
-1. Bilaterale Qualifikation zur EEBUS-Kopplung und -Steuerung (DLMS-Flag-ID als Anker).
+1. Bilaterale Qualifikation zur EEBUS-Kopplung und -Steuerung (IANA PEN als Anker, ADR-0018).
 2. Sie teilen Ihre well-known URI mit.
 3. Sie erhalten: API-Basis-URL, die zwei mTLS-Endpunkte (Discovery + Provisioning) und
    Ihre Quoten. Konfigurieren Sie diese im Backend — nie im Code hart verdrahten.

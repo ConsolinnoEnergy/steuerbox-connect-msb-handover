@@ -28,6 +28,15 @@ pub fn regel_s_base(serial: &str) -> &str {
     }
 }
 
+/// Extract the IANA PEN part from `i:<IANA-PEN>_u:<VPID>` (ADR-0018 fleet binding).
+/// `None` for input outside the SHIP-ID shape.
+pub fn iana_pen(ship_id: &str) -> Option<&str> {
+    let rest = ship_id.strip_prefix("i:")?;
+    let idx = rest.find("_u:")?;
+    let pen = &rest[..idx];
+    (!pen.is_empty() && pen.bytes().all(|b| b.is_ascii_digit())).then_some(pen)
+}
+
 /// Extract the VPID part from `i:<IANA-PEN>_u:<VPID>`; non-VPID input passes through.
 pub fn vpid_to_serial(query: &str) -> &str {
     if let Some(rest) = query.strip_prefix("i:") {
@@ -97,6 +106,20 @@ mod tests {
         assert_eq!(vpid_to_serial("i:9901_u:SNTEST0001-X1"), "SNTEST0001-X1");
         assert_eq!(vpid_to_serial("SNTEST0001"), "SNTEST0001");
         assert_eq!(vpid_to_serial("i:9901_novpid"), "i:9901_novpid");
+    }
+
+    // ADR-0018: the IANA PEN inside the SHIP-ID must be extractable — the MSB
+    // compares it against the well-known iana_pen (fleet binding).
+    #[test]
+    fn iana_pen_parsing() {
+        assert_eq!(iana_pen("i:12345_u:1U0022_CO-4206"), Some("12345"));
+        assert_eq!(iana_pen("i:0002_u:HEMS1"), Some("0002"));
+        assert_eq!(iana_pen("i:12345_u:SNTEST0001-X1"), Some("12345"));
+        // non-SHIP-ID shapes → None
+        assert_eq!(iana_pen("ship-conformance"), None);
+        assert_eq!(iana_pen("i:12345_novpid"), None);
+        assert_eq!(iana_pen("i:_u:HEMS1"), None); // empty PEN
+        assert_eq!(iana_pen("i:67x52_u:HEMS1"), None); // non-digit PEN
     }
 
     #[test]

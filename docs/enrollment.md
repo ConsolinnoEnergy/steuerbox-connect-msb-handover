@@ -9,7 +9,7 @@ Referenz: `src/wellknown/` (Server), `src/ems-backend/` (Client-Konfiguration),
 
 Voraussetzung der Kopplung ist eine einmalige **Qualifikation** zwischen MSB und
 EMS-Hersteller zur EEBUS-Kopplung und -Steuerung. Der Anker sind die
-**DLMS-Flag-ID** (z.B. `CEG`) — kein zentrales Register, keine bilateralen Credential-Stores.
+**IANA PEN** (z.B. `12345`, ADR-0018) — kein zentrales Register, keine bilateralen Credential-Stores.
 
 Austausch nach der Qualifikation:
 
@@ -27,7 +27,7 @@ kennt die MSB-Koordinaten. Beides lebt in **Konfiguration**, nie hart im Code.
 
 ```json
 {
-  "dlms_manufacturer_id": "CEG",
+  "iana_pen": "12345",
   "client_ca": {
     "pem": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCg==",
     "scope": "steuerbox-connect-api",

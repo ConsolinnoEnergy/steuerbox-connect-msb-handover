@@ -3,12 +3,12 @@
   "$id": "https://example.org/wellknown.schema.json",
   "title": "steuerbox-connect well-known document",
   "type": "object",
-  "required": ["dlms_manufacturer_id", "client_ca", "contact"],
+  "required": ["iana_pen", "client_ca", "contact"],
   "properties": {
-    "dlms_manufacturer_id": {
+    "iana_pen": {
       "type": "string",
-      "description": "DLMS manufacturer flag id (IEC 62056, publicly registered by the DLMS UA), e.g. CEG for an example manufacturer",
-      "pattern": "^[A-Z]{3}$"
+      "description": "IANA PEN of the EMS manufacturer, e.g. 12345. The MSB MUST reject provisioning whose pairing_dataset.ship_id carries a different IANA PEN (fleet binding, ADR-0018).",
+      "pattern": "^[0-9]{1,7}$"
     },
     "client_ca": {
       "type": "object",

@@ -10,7 +10,7 @@ Template: **Nummer · Status · Context · Decision · Consequences.**
 | Nummer | Thema | Status |
 |---|---|---|
 | [0001](0001-two-ca-model.md) | Two-CA model — separate server-TLS and client-mTLS trust domains | Accepted |
-| [0002](0002-qualification-handshake.md) | Bilateral qualification handshake (DLMS flag id anchor; EEBUS Cert-ID removed — not yet available) | Accepted (amended 2026-09-25) |
+| [0002](0002-qualification-handshake.md) | Bilateral qualification handshake (IANA PEN anchor, ADR-0018; EEBUS Cert-ID removed — not yet available) | Accepted (amended 2026-10-10) |
 | [0003](0003-wellknown-publishes-client-ca.md) | Well-known document publishes the dedicated client CA | Accepted |
 | [0004](0004-tolerant-matching-anti-enumeration.md) | Tolerant matching + anti-enumeration (Regel S) | Accepted, partially superseded by 0012 |
 | [0005](0005-tri-state.md) | Tri-state semantics — transport failure is `unknown` | Accepted (clarified 2026-09-25) |
@@ -24,7 +24,9 @@ Template: **Nummer · Status · Context · Decision · Consequences.**
 | [0013](0013-wellknown-wire-format.md) | Well-known wire format — base64 `client_ca.pem`, validity window | Accepted (amends ADR-0003) |
 | [0014](0014-rsa-marvin-accepted-risk.md) | Accepted residual risk: `rsa` crate (RUSTSEC-2023-0071, Marvin Attack) | Accepted (2026-09-25) |
 | [0015](0015-msb-core-library.md) | `msb-core` embeddable library + `MsbStore` integration seam for MSB backends | Accepted (2026-09-25) |
-| [0016](0016-dlms-manufacturer-id.md) | DLMS manufacturer flag id (`dlms_manufacturer_id`, z.B. `CEG`) instead of self-chosen `manufacturer_id` | Accepted (2026-09-25, amends ADR-0003) |
+| [0016](0016-dlms-manufacturer-id.md) | DLMS manufacturer flag id (`dlms_manufacturer_id`, z.B. `CEG`) instead of self-chosen `manufacturer_id` | Superseded by ADR-0018 (2026-10-10) |
+| [0017](0017-slim-provisioning-payload.md) | Slim provisioning payload — `pairing_dataset {ship_id, ski, qr_info}` only | Accepted |
+| [0018](0018-iana-pen-fleet-binding.md) | `iana_pen` in the well-known document replaces the DLMS flag id; fleet binding on provisioning (`422 fleet_mismatch`) | Accepted (2026-10-10, supersedes ADR-0016) |
 
 ## Themen, die einen neuen ADR erfordern
 

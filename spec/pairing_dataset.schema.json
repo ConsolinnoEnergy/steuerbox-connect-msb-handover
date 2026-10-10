@@ -7,7 +7,7 @@
   "properties": {
     "ship_id": {
       "type": "string",
-      "description": "HEMS ship_id i:<IANA-PEN>_u:<VPID> — the VPID part IS the HEMS serial, so no separate serial field exists (two serials, never mixed: the path carries the Steuerbox serial)."
+      "description": "HEMS ship_id i:<IANA-PEN>_u:<VPID> — the IANA PEN part MUST match the iana_pen published in the manufacturer's well-known document (fleet binding, ADR-0018); the VPID part IS the HEMS serial, so no separate serial field exists (two serials, never mixed: the path carries the Steuerbox serial)."
     },
     "ski": { "type": "string" },
     "qr_info": {

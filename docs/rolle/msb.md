@@ -50,7 +50,7 @@ Payload-/Response-Details: [REST-API-Referenz](../api.md).
 
 ## 2. Qualifikation & Pinning
 
-1. Bilaterale Qualifikation je EMS-Hersteller (DLMS-Flag-ID als Anker): Sie erhalten die
+1. Bilaterale Qualifikation je EMS-Hersteller (IANA PEN als Anker, ADR-0018): Sie erhalten die
    well-known URI, teilen API-Basis-URL, die zwei Endpunkte und Quoten mit.
 2. Sie halten die Client-CA in Ihrem Pin-Store (TOFU + TTL; Quelle: Well-known-Publikation
    des Herstellers bzw. die in der Qualifikation geteilte CA).

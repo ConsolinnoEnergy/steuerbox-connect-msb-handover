@@ -11,7 +11,7 @@
   it MUST never appear in logs, traces, error bodies or operator alarms, and the MSB
   forwards it ONLY via its existing box admin channel (Steuerbox admin / TAF on
   SMGWv2). Provisioning bodies are never logged; metadata only
-  (`serial, dlms_manufacturer_id, cert_fingerprint, status, ts`). No SHIP secret in
+  (`serial, iana_pen, cert_fingerprint, status, ts`). No SHIP secret in
   logs, documentation examples beyond the masked normative schema example, or audit
   output — ever.
 - **Consequences:** Normative scenarios `NetworkBoundaries` + secret-freedom checks in

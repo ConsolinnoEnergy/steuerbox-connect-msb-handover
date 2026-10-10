@@ -4,6 +4,9 @@ Credentials for the mTLS API (server must have this client CA pinned):
 - CONF_CERT / CONF_KEY  — mTLS client certificate + key (PEM)
 - CONF_ROOT             — server-TLS root bundle to verify the target against
 - CONF_SERIAL           — a serial in the target's portfolio (default SNTEST0001)
+- CONF_IANA_PEN         — the IANA PEN the target pinned from the manufacturer's
+                          well-known document (default 12345, the example PEN);
+                          provisioning ship_ids carry this PEN (ADR-0018 fleet binding)
 - CONF_RATE_TARGET      — optional base URL of a rate-limited instance (default: none;
   rate-limit cases are skipped without it)
 """
@@ -43,13 +46,20 @@ def serial() -> str:
 
 
 @pytest.fixture(scope="session")
+def iana_pen() -> str:
+    return os.environ.get("CONF_IANA_PEN", "12345")
+
+
+@pytest.fixture(scope="session")
 def rate_target() -> str | None:
     return os.environ.get("CONF_RATE_TARGET")
 
 
-# shared valid provisioning body; ship_id is conformance-unique so write-once tests
-# can derive a conflict deterministically
-def pairing_dataset(ship_id: str = "ship-conformance") -> dict:
+# shared valid provisioning body; ship_id carries the pinned IANA PEN (ADR-0018
+# fleet binding) and is conformance-unique so write-once tests can derive a
+# conflict deterministically
+def pairing_dataset(ship_id: str | None = None, iana_pen: str = "12345") -> dict:
+    ship_id = ship_id or f"i:{iana_pen}_u:ship-conformance"
     return {
         "ship_id": ship_id,
         "ski": "SNTESTCONF_SKI0001",

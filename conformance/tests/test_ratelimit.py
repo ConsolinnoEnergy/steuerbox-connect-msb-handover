@@ -26,10 +26,10 @@ def test_discovery_429_carries_retry_after_and_code(client, rate_target):
     assert False, "quota never exhausted after 10_000 requests"
 
 
-def test_provisioning_honors_retry_after(client, rate_target):
+def test_provisioning_honors_retry_after(client, rate_target, iana_pen):
     if rate_target is None:
         pytest.skip("CONF_RATE_TARGET not set")
-    body = {"pairing_dataset": pairing_dataset("ship-conformance-rate")}
+    body = {"pairing_dataset": pairing_dataset(f"i:{iana_pen}_u:ship-conformance-rate", iana_pen=iana_pen)}
     for _ in range(10_000):
         r = client.post(
             f"{rate_target.rstrip('/')}/v1/serials/SNCONF9999/provisioning",

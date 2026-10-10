@@ -1,6 +1,6 @@
 {
   "$id": "https://example.org/wellknown.example.json",
-  "dlms_manufacturer_id": "CEG",
+  "iana_pen": "12345",
   "client_ca": {
     "pem": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCg==",
     "scope": "steuerbox-connect-api",

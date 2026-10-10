@@ -342,14 +342,14 @@
       "WellKnownDocument": {
         "type": "object",
         "required": [
-          "dlms_manufacturer_id",
+          "iana_pen",
           "client_ca",
           "contact"
         ],
         "properties": {
-          "dlms_manufacturer_id": {
+          "iana_pen": {
             "type": "string",
-            "description": "DLMS manufacturer flag id (IEC 62056, publicly registered by the DLMS UA), e.g. CEG for an example manufacturer",
+            "description": "IANA PEN of the EMS manufacturer, e.g. 12345 (fleet binding, ADR-0018)",
             "pattern": "^[A-Z]{3}$"
           },
           "client_ca": {
@@ -380,7 +380,7 @@
             "type": "string"
           }
         },
-        "description": "Well-known-Dokument: DLMS-Hersteller-ID, dedizierte Client-CA (base64-PEM, scope steuerbox-connect-api, Gültigkeitsfenster) und Kontakt."
+        "description": "Well-known-Dokument: IANA PEN des Herstellers, dedizierte Client-CA (base64-PEM, scope steuerbox-connect-api, Gültigkeitsfenster) und Kontakt."
       }
     }
   }

@@ -29,7 +29,7 @@ def test_not_canonical_serial_is_400(client, target, serial):
 def test_unknown_serial_is_404_not_found(client, target):
     body = {
         "pairing_dataset": {
-            "ship_id": "ship-conformance",
+            "ship_id": "i:12345_u:ship-conformance",
             "ski": "s",
             "qr_info": "SHIP;SKI:conf-ski;ID:conf-id;ENDSHIP;",
         }
@@ -42,7 +42,7 @@ def test_unknown_serial_is_404_not_found(client, target):
 def test_invalid_hems_serial_is_422_invalid_pairing_dataset(client, target, serial):
     body = {
         "pairing_dataset": {
-            "ship_id": "ship-conformance",
+            "ship_id": "i:12345_u:ship-conformance",
             "ski": "s",
             "qr_info": "SHIP;SKI:x;",  # no ENDSHIP; → invalid dataset
         }

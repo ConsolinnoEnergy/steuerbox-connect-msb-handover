@@ -58,6 +58,7 @@ fn main() -> anyhow::Result<()> {
             box_admin,
             env_or("MSB_ADMIN_TOKEN", "admin-test-token"),
         )
+        .with_iana_pen(env_or("MSB_IANA_PEN", "12345"))
         .with_tls(
             env_or("MSB_TLS_CERT", "test/ca/out/msb-chain.pem").into(),
             env_or("MSB_TLS_KEY", "test/ca/out/msb-key.pem").into(),

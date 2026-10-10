@@ -86,8 +86,11 @@ paths:
             Either `box_mismatch` (supplied box_evidence does not match inventory;
             partial evidence counts as a mismatch) or `invalid_pairing_dataset`
             (pairing_dataset incomplete/invalid — e.g. qr_info outside the
-            SHIP-Info-Datensatz shape `SHIP;…ENDSHIP;`) or `invalid_body` (request
-            body is not a valid provisioning request).
+            SHIP-Info-Datensatz shape `SHIP;…ENDSHIP;`) or `fleet_mismatch` (the
+            IANA PEN inside pairing_dataset.ship_id does not match the IANA PEN
+            published in the manufacturer's well-known document — fleet binding,
+            ADR-0018) or `invalid_body` (request body is not a valid provisioning
+            request).
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
@@ -100,6 +103,10 @@ paths:
                   value:
                     error: invalid_pairing_dataset
                     message: pairing_dataset incomplete or invalid
+                fleetMismatch:
+                  value:
+                    error: fleet_mismatch
+                    message: ship_id belongs to a different manufacturer fleet
                 invalidBody:
                   value:
                     error: invalid_body
@@ -157,6 +164,7 @@ components:
           enum:
             - box_mismatch        # 422 — evidence does not match inventory
             - invalid_pairing_dataset # 422 — pairing_dataset incomplete/invalid
+            - fleet_mismatch      # 422 — ship_id PEN ≠ well-known iana_pen (ADR-0018)
             - invalid_body        # 422 — body is not a valid provisioning request
             - not_canonical       # 400 — path serial is not the canonical serial
             - not_found           # 404 — serial not in portfolio / killed

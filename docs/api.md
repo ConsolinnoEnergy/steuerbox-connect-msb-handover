@@ -22,7 +22,7 @@ Well-known-Dokument des EMS-Herstellers. Kein Request-Body, keine Authentifizier
 
 ```json
 {
-  "dlms_manufacturer_id": "CEG",
+  "iana_pen": "12345",
   "client_ca": {
     "pem": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCg==",
     "scope": "steuerbox-connect-api",
@@ -35,7 +35,7 @@ Well-known-Dokument des EMS-Herstellers. Kein Request-Body, keine Authentifizier
 
 | Feld | Typ | Pflicht | Bedeutung |
 |---|---|---|---|
-| `dlms_manufacturer_id` | string, `^[A-Z]{3}$` | ja | Öffentlich registrierte DLMS-Flag-ID (IEC 62056) |
+| `iana_pen` | string, `^[0-9]{1,7}$` | ja | IANA PEN des Herstellers (z.B. `12345`); Fleet-Binding, ADR-0018 |
 | `client_ca.pem` | string (base64-PEM) | ja | Dedizierte Client-Sub-CA, die die mTLS-Client-Certs des EMS-Backends signiert |
 | `client_ca.scope` | string | ja | Immer `steuerbox-connect-api` |
 | `client_ca.not_before` / `not_after` | date-time | nein | Gültigkeitsfenster (Rotation-Grace) |
