@@ -3,45 +3,9 @@
   "info": {
     "title": "steuerbox-connect API",
     "version": "0.4.0",
-    "description": "REST-API für das Zero-Touch-Pairing von EMS (HEMS) und Steuerbox (§14a EnWG).\n\nDie zwei MSB-Endpunkte (Discovery + Provisioning) sind **mTLS-only**: das Client-Zertifikat wird gegen die gepinnte Client-CA des EMS-Herstellers geprüft. Rate Limits sind Vertrag: `429` + `Retry-After`; Clients müssen `Retry-After` einhalten.\n\nDiscovery ist status-code basiert: `200` = found, `404` = not found (jeweils leerer Body); die kanonische Serial leitet der Client deterministisch aus der Query ab (Regel-S-Basis, ADR-0012). Transportfehler sind clientseitig `unknown`, nie `404` (ADR-0005).\n\nNormative Quellen: spec/discovery.yaml, spec/provisioning.yaml, spec/wellknown.schema.json. Diese JSON-Datei ist eine zusammengeführte Ansicht für Swagger UI."
+    "description": "Generated from spec/*.yaml and their JSON schemas. Do not edit this view independently."
   },
-  "tags": [
-    {
-      "name": "Well-known (EMS-Hersteller)"
-    },
-    {
-      "name": "Discovery (MSB, mTLS)"
-    },
-    {
-      "name": "Provisioning (MSB, mTLS)"
-    }
-  ],
   "paths": {
-    "/.well-known/steuerbox-connect/v1": {
-      "get": {
-        "operationId": "getWellknownDocument",
-        "summary": "Well-known-Dokument des EMS-Herstellers (Client-CA-Publikation)",
-        "tags": [
-          "Well-known (EMS-Hersteller)"
-        ],
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Das Well-known-Dokument.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WellKnownDocument"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Dokument an dieser URL nicht veröffentlicht."
-          }
-        }
-      }
-    },
     "/v1/serials/{serial}": {
       "get": {
         "operationId": "discoverSerial",
@@ -52,9 +16,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 4,
-              "maxLength": 32
-            }
+              "minLength": 1
+            },
+            "description": "Serial or complete suffixed VPID; short prefix queries are valid requests returning 404."
           }
         ],
         "responses": {
@@ -79,7 +43,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/discovery_ErrorResponse"
                 },
                 "examples": {
                   "rateLimited": {
@@ -97,11 +61,7 @@
           {
             "mtls": []
           }
-        ],
-        "tags": [
-          "Discovery (MSB, mTLS)"
-        ],
-        "summary": "Discovery — gehört diese Serial/VPID zu diesem MSB? (200 found / 404 not found)"
+        ]
       }
     },
     "/v1/serials/{serial}/provisioning": {
@@ -123,11 +83,21 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProvisioningRequest"
+                "$ref": "#/components/schemas/provisioning_ProvisioningRequest"
               },
               "examples": {
                 "provisioningRequest": {
-                  "$ref": "./examples/provisioning-request.json"
+                  "value": {
+                    "pairing_dataset": {
+                      "ship_id": "i:12345_u:SNTEST_HEMS-0001",
+                      "ski": "0000000000000000000000000000000000000001",
+                      "qr_info": "SHIP;SKI:0000000000000000000000000000000000000001;ID:i:12345_u:SNTEST_HEMS-0001;BRAND:ExampleEMS;TYPE:EnergyManagementSystem;MODEL:Reference-HEMS;SERIAL:SNTEST_HEMS-0001;CAT:2;FPH256:0000000000000000000000000000000000000000000000000000000000000001;SPSEC:SPSEC-EXAMPLE-REPLACE-IN-PROD;ENDSHIP;"
+                    },
+                    "box_evidence": {
+                      "ship_id": "i:0001_u:SNTEST0001",
+                      "ski": "0000000000000000000000000000000000000002"
+                    }
+                  }
                 }
               }
             }
@@ -139,7 +109,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AcceptedResult"
+                  "$ref": "#/components/schemas/provisioning_AcceptedResult"
                 },
                 "examples": {
                   "accepted": {
@@ -156,7 +126,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/provisioning_ErrorResponse"
                 },
                 "examples": {
                   "notCanonical": {
@@ -174,7 +144,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/provisioning_ErrorResponse"
                 },
                 "examples": {
                   "notFound": {
@@ -192,7 +162,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/provisioning_ErrorResponse"
                 },
                 "examples": {
                   "writeOnceConflict": {
@@ -206,11 +176,11 @@
             }
           },
           "422": {
-            "description": "Either `box_mismatch` (supplied box_evidence does not match inventory; partial evidence counts as a mismatch) or `invalid_pairing_dataset` (pairing_dataset incomplete/invalid — e.g. qr_info outside the SHIP-Info-Datensatz shape `SHIP;…ENDSHIP;`) or `invalid_body` (request body is not a valid provisioning request).\n",
+            "description": "Either `box_mismatch` (supplied box_evidence does not match inventory; partial evidence counts as a mismatch) or `invalid_pairing_dataset` (pairing_dataset incomplete/invalid — e.g. qr_info outside the SHIP-Info-Datensatz shape `SHIP;…ENDSHIP;`) or `fleet_mismatch` (the IANA PEN inside pairing_dataset.ship_id does not match the IANA PEN published in the manufacturer's well-known document — fleet binding, ADR-0018) or `invalid_body` (request body is not a valid provisioning request).\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/provisioning_ErrorResponse"
                 },
                 "examples": {
                   "boxMismatch": {
@@ -223,6 +193,12 @@
                     "value": {
                       "error": "invalid_pairing_dataset",
                       "message": "pairing_dataset incomplete or invalid"
+                    }
+                  },
+                  "fleetMismatch": {
+                    "value": {
+                      "error": "fleet_mismatch",
+                      "message": "ship_id belongs to a different manufacturer fleet"
                     }
                   },
                   "invalidBody": {
@@ -250,7 +226,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/provisioning_ErrorResponse"
                 },
                 "examples": {
                   "rateLimited": {
@@ -268,59 +244,88 @@
           {
             "mtls": []
           }
-        ],
-        "tags": [
-          "Provisioning (MSB, mTLS)"
-        ],
-        "summary": "Provisioning — EEBUS-Daten des EMS übermitteln"
-      }
-    }
-  },
-  "components": {
-    "securitySchemes": {
-      "mtls": {
-        "type": "mutualTLS"
+        ]
       }
     },
-    "schemas": {
-      "ProvisioningRequest": {
-        "type": "object",
-        "required": [
-          "pairing_dataset"
-        ],
-        "properties": {
-          "pairing_dataset": {
-            "$ref": "./pairing_dataset.schema.json"
-          },
-          "box_evidence": {
-            "type": "object",
-            "description": "In-LAN observed Steuerbox ship_id + ski (client SHOULD send; server MUST accept without it). Server SHOULD verify against inventory: mismatch → 422 box_mismatch + operator alarm; supplied but unverifiable (no inventory entry) → accepted with operator alarm — never a silent ignore. Partial evidence (only one of ship_id/ski) counts as mismatch.\n",
-            "properties": {
-              "ship_id": {
-                "type": "string"
-              },
-              "ski": {
-                "type": "string"
+    "/.well-known/steuerbox-connect/v1": {
+      "get": {
+        "operationId": "getWellknownDocument",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Manufacturer fleet identifier and client CA publication.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "$id": "https://example.org/wellknown.schema.json",
+                  "title": "steuerbox-connect well-known document",
+                  "type": "object",
+                  "required": [
+                    "iana_pen",
+                    "client_ca",
+                    "contact"
+                  ],
+                  "properties": {
+                    "iana_pen": {
+                      "type": "string",
+                      "description": "IANA PEN of the EMS manufacturer, e.g. 12345. The MSB MUST reject provisioning whose pairing_dataset.ship_id carries a different IANA PEN (fleet binding, ADR-0018).",
+                      "pattern": "^[0-9]{1,7}$"
+                    },
+                    "client_ca": {
+                      "type": "object",
+                      "required": [
+                        "pem",
+                        "scope"
+                      ],
+                      "properties": {
+                        "pem": {
+                          "type": "string",
+                          "contentEncoding": "base64"
+                        },
+                        "scope": {
+                          "const": "steuerbox-connect-api"
+                        },
+                        "not_before": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "not_after": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "contact": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "publication": {
+                    "value": {
+                      "$id": "https://example.org/wellknown.example.json",
+                      "iana_pen": "12345",
+                      "client_ca": {
+                        "pem": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCg==",
+                        "scope": "steuerbox-connect-api",
+                        "not_before": "2026-09-25T11:17:03Z",
+                        "not_after": "2026-10-25T11:17:03Z"
+                      },
+                      "contact": "ops@example-ems.example"
+                    }
+                  }
+                }
               }
             }
           }
         }
-      },
-      "AcceptedResult": {
-        "type": "object",
-        "required": [
-          "status"
-        ],
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "accepted"
-            ]
-          }
-        }
-      },
-      "ErrorResponse": {
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "discovery_ErrorResponse": {
         "type": "object",
         "required": [
           "error",
@@ -339,48 +344,95 @@
           }
         }
       },
-      "WellKnownDocument": {
+      "provisioning_ProvisioningRequest": {
         "type": "object",
         "required": [
-          "iana_pen",
-          "client_ca",
-          "contact"
+          "pairing_dataset"
         ],
         "properties": {
-          "iana_pen": {
-            "type": "string",
-            "description": "IANA PEN of the EMS manufacturer, e.g. 12345 (fleet binding, ADR-0018)",
-            "pattern": "^[A-Z]{3}$"
-          },
-          "client_ca": {
+          "pairing_dataset": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "https://example.org/pairing_dataset.schema.json",
+            "title": "pairing_dataset",
             "type": "object",
             "required": [
-              "pem",
-              "scope"
+              "ship_id",
+              "ski",
+              "qr_info"
             ],
             "properties": {
-              "pem": {
+              "ship_id": {
                 "type": "string",
-                "contentEncoding": "base64"
+                "description": "HEMS ship_id i:<IANA-PEN>_u:<VPID> — the IANA PEN part MUST match the iana_pen published in the manufacturer's well-known document (fleet binding, ADR-0018); the VPID part IS the HEMS serial, so no separate serial field exists (two serials, never mixed: the path carries the Steuerbox serial)."
               },
-              "scope": {
-                "const": "steuerbox-connect-api"
+              "ski": {
+                "type": "string"
               },
-              "not_before": {
+              "qr_info": {
                 "type": "string",
-                "format": "date-time"
-              },
-              "not_after": {
-                "type": "string",
-                "format": "date-time"
+                "description": "SHIP-Info-Datensatz from the EEBUS QR content (SHIP;SKI:…;ID:…;FPH256:…;SPSEC:…;ENDSHIP;) — carries the FNN credential fingerprint and the SPSEC security code; mTLS is the secret's transport (ADR-0008/-0017), the MSB forwards it only via the box admin channel and never logs it. No separate fph or base_uri field.",
+                "pattern": "^SHIP;.+ENDSHIP;$"
               }
             }
           },
-          "contact": {
+          "box_evidence": {
+            "type": "object",
+            "description": "In-LAN observed Steuerbox ship_id + ski (client SHOULD send; server MUST accept without it). Server SHOULD verify against inventory: mismatch → 422 box_mismatch + operator alarm; supplied but unverifiable (no inventory entry) → accepted with operator alarm — never a silent ignore. Partial evidence (only one of ship_id/ski) counts as mismatch.\n",
+            "properties": {
+              "ship_id": {
+                "type": "string"
+              },
+              "ski": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "provisioning_AcceptedResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted"
+            ]
+          }
+        }
+      },
+      "provisioning_ErrorResponse": {
+        "type": "object",
+        "required": [
+          "error",
+          "message"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "box_mismatch",
+              "invalid_pairing_dataset",
+              "fleet_mismatch",
+              "invalid_body",
+              "not_canonical",
+              "not_found",
+              "rate_limited",
+              "write_once_conflict"
+            ],
+            "description": "Machine-readable error code; status mapping in the enum comments."
+          },
+          "message": {
             "type": "string"
           }
-        },
-        "description": "Well-known-Dokument: IANA PEN des Herstellers, dedizierte Client-CA (base64-PEM, scope steuerbox-connect-api, Gültigkeitsfenster) und Kontakt."
+        }
+      }
+    },
+    "securitySchemes": {
+      "mtls": {
+        "type": "mutualTLS"
       }
     }
   }

@@ -1,0 +1,26 @@
+[package]
+name = "ems-backend"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+steuerbox-protocol = { path = "../protocol", version = "0.1.0" }
+tokio.workspace = true
+tokio-rustls.workspace = true
+rustls.workspace = true
+rustls-pki-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+zeroize.workspace = true
+time = { version = "0.3", features = ["parsing"] }
+url.workspace = true
+rsa.workspace = true
+base64.workspace = true
+sha2.workspace = true
+rand.workspace = true

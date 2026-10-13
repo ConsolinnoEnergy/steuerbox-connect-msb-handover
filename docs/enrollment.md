@@ -2,8 +2,8 @@
 
 Das Enrollment ist der einmalige, bilaterale Vertrauens-Aufbau zwischen einem
 MSB und einem EMS-Hersteller. Normative Basis: `spec/wellknown.schema.json`.
-Referenz: `src/wellknown/` (Server), `src/ems-backend/` (Client-Konfiguration),
-`src/msb/` (Pin-Store).
+Referenz: `reference/wellknown/` (Server), `reference/ems-backend/` (Client-Konfiguration),
+`reference/msb-core/` (Pin-Store).
 
 ## Qualifikations-Handshake
 

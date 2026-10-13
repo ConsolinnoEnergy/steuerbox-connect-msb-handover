@@ -3,7 +3,8 @@
 **Offene Referenzimplementierung des bilateralen Zero-Touch-Bootstraps zwischen
 EMS-Herstellern und Messstellenbetreibern (MSB) für Steuerboxen (§14a EnWG).**
 
-> **Status:** Referenzprojekt / POC — nicht normativ. **Lizenz:** Apache-2.0.
+> **Status:** Referenzprojekt / POC. Spezifikation und Abnahmetests definieren den
+> Schnittstellenvertrag; LAN-Geräte sind simuliert. **Lizenz:** MIT.
 > Diese Seite ist die Implementierungs-Dokumentation für EMS-Hersteller und
 > Messstellenbetreiber (MSB).
 
@@ -13,10 +14,10 @@ Dieses Repo bildet **ausschließlich die Backend-zu-Backend-Schiene** ab:
 
 | Bestandteil | Im Repo? |
 |---|---|
-| Discovery- und Provisioning-API (mTLS) | ✅ Spec (`spec/`) + Referenz-MSB (`src/msb/`, einbindbar als Library `src/msb-core/`) |
-| Well-known-Endpunkt & Client-CA-Pinning | ✅ Spec + Referenz (`src/wellknown/`) |
-| Referenz-EMS-Backend (Client) | ✅ `src/ems-backend/` |
-| e2e-/Conformance-Suite, POC, Doku | ✅ `test/`, `conformance/`, diese Seite |
+| Discovery- und Provisioning-API (mTLS) | ✅ Spec (`spec/`) + Referenz-MSB (`reference/msb/`, Library `reference/msb-core/`) |
+| Well-known-Endpunkt & Client-CA-Pinning | ✅ Spec + Referenz (`reference/wellknown/`, `reference/ems-backend/`) |
+| Referenz-EMS-Backend (Client) | ✅ `reference/ems-backend/` |
+| E2E-/Conformance-Suite, POC, Doku | ✅ `reference/e2e/`, `conformance/`, diese Seite |
 | HEMS-Installation beim Kunden | ❌ (nur Prozesskontext) |
 | LAN-Erkennung der Steuerbox im Feld | ❌ (im Repo nur als HEMS-Mock-Eingabe) |
 | SMGW-Installation & -Parameterisierung | ❌ (nur Prozesskontext) |
@@ -42,9 +43,13 @@ Dieses Repo bildet **ausschließlich die Backend-zu-Backend-Schiene** ab:
 ## Schnellstart (Referenz-Stack lokal)
 
 ```bash
-git clone <REPO_URL> && cd eebus-pairing
-make e2e        # CA erzeugen, alles bauen, 13 Szenarien als lokale Prozesse
+git clone https://github.com/ConsolinnoEnergy/steuerbox-connect-msb-handover.git
+cd steuerbox-connect-msb-handover
+make e2e        # frische CA erzeugen, alles bauen, 16 Szenarien als lokale Prozesse
 make demo       # nur HappyPath_ZeroTouch
 ```
 
-Status: Prototyp/POC. Lizenz Apache-2.0, keine Rechtsberatung.
+Für Konformanz, Python-Abhängigkeiten und Submodul-Entwicklung siehe
+[Testen](testen.md) und [Entwicklung](entwicklung.md).
+
+Status: Prototyp/POC. Lizenz MIT, keine Rechtsberatung.

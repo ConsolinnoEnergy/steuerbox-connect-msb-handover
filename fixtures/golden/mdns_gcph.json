@@ -1,0 +1,18 @@
+{
+  "name": "synthetic_gcph_control_module",
+  "source": "Synthetic record preserving the public SHIP TXT wire format; no field data",
+  "service": "_ship._tcp",
+  "instance": "Reference Control Module",
+  "hostname": "SNTESTGCPH0001.local",
+  "address": "192.0.2.10",
+  "port": 19543,
+  "txt": [
+    "type=GCPH", "ski=SNTESTSKIGCPH0001", "serial", "register=false",
+    "path=/ship/", "model=Control Module", "id=i:51593_u:SNTESTGCPH0001",
+    "cat=1", "brand=Test Smart Energy GmbH", "txtvers=1"
+  ],
+  "expected": {
+    "stb_serial": "SNTESTGCPH0001",
+    "stb_vpid": "i:51593_u:SNTESTGCPH0001"
+  }
+}

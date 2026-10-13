@@ -19,7 +19,7 @@ es fallen keine Lizenzgebühren an.
 Referenzpaket für MSB-Plattformen zur Implementierung der beiden mTLS-Endpunkte des
 bilateralen Zero-Touch-Bootstraps für §14a EnWG Steuerboxen:
 
-1. **Discovery** — `GET /v1/serials/{serial|vpid}` (tristate: 200 found / 404 not found / 503 unknown)
+1. **Discovery** — `GET /v1/serials/{serial|vpid}` (200 found / 404 not found; Transportfehler sind clientseitig unknown)
 2. **Provisioning** — `POST /v1/serials/{serial}/provisioning` (idempotent, mTLS transportiert den SHIP-Info-Datensatz)
 
 ## Inhalt
@@ -28,8 +28,9 @@ bilateralen Zero-Touch-Bootstraps für §14a EnWG Steuerboxen:
 |---|---|
 | `spec/` | **Normativ:** OpenAPI 3.1 (`discovery.yaml`, `provisioning.yaml`), JSON-Schemas (`wellknown.schema.json`, `pairing_dataset.schema.json`), Beispiele |
 | `conformance/` | **Abnahme:** black-box pytest-Suite — läuft gegen jede MSB-Implementierung, prüft mTLS-only, Tri-State, Anti-Enumeration, Idempotenz, Rate-Limits, box_evidence, Fleet-Binding, Error-Taxonomie |
-| `docs/` | Deutsche Implementierungsdoku (mkdocs-material), ADR-0001 … ADR-0018 (bindende Entscheidungen) |
-| `reference/` | Optionaler Rust-Referenz-Code (`msb-core`, `msb`) — tolerant matcher, evidence verifier, pin store, fleet binding. **So kann es aussehen**, nicht als Kopiervorlage |
+| `docs/` | Deutsche Implementierungsdoku (mkdocs-material), ADR-0001 … ADR-0019 (bindende Entscheidungen) |
+| `reference/` | Eigenständiger Rust-Stack: MSB, EMS-Backend, Well-known, Box-/HEMS-Mocks und E2E-Runner |
+| `test/ca/`, `fixtures/`, `deploy/compose/` | Lokal erzeugte Test-PKI, synthetische Parser-Fixtures und optionaler Compose-Stack |
 
 > **Beispiel-IANA-PEN:** `12345` — die Beispiele, Schemas und die Conformance-Suite
 > verwenden diese Beispiel-PEN. Ihre echte IANA PEN konfigurieren Sie selbst
@@ -37,15 +38,41 @@ bilateralen Zero-Touch-Bootstraps für §14a EnWG Steuerboxen:
 
 ## Schnellstart (Abnahme)
 
+### Vollständiger lokaler Referenzlauf
+
+Voraussetzungen: Rust/Cargo (aktueller Stable-Toolchain), Make, Bash und OpenSSL.
+Für Konformanz und Dokumentation zusätzlich Python 3.10+.
+
+```bash
+make test e2e             # Rust-Tests + 16 öffentliche E2E-Szenarien, ohne Docker
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+make PYTHON=.venv/bin/python conformance-local public-check spec-validate
+make demo                 # HappyPath inkl. simulierter SHIP-TLS-Kopplung
+```
+
+Der Stack ist unabhängig von Unternehmensdiensten. Zertifikate und Schlüssel
+werden frisch unter dem gitignorierten `test/ca/out/` erzeugt. Beobachtungen
+der Steuerbox werden als synthetische TXT-Daten eingespeist; die LAN-Kopplung
+ist ein TLS/SKI-Mock, kein vollständiger EEBUS-SHIP-Protokollstack.
+Logs: `reference/target/e2e-logs/<Szenario>/`.
+
+Optional: `make e2e-docker` führt dieselben Szenarien mit Docker Compose aus.
+GitLab-Projekte können dieses Repository als GitHub-Submodul einbinden;
+siehe [Entwicklung und Synchronisation](docs/entwicklung.md).
+
+### Gegen eine eigene MSB-Implementierung
+
 ```bash
 # Konformanz-Suite gegen die eigene Staging-Umgebung
 cd conformance
 pip install -r requirements.txt
-export CONF_BASE_URL=https://ihre-staging-url
+export TARGET=https://ihre-staging-url
 export CONF_CERT=/pfad/zum/client-cert.pem
 export CONF_KEY=/pfad/zum/client-key.pem
 export CONF_IANA_PEN=12345   # die IANA PEN, die Ihr MSB aus unserem Well-known-Dokument gepinnt hat
-pytest tests/ -v
+export CONF_ROOT=/pfad/zum/server-root-bundle.pem
+pytest tests/ -v --target="$TARGET"
 ```
 
 Alle Tests müssen grün sein — die Suite ist das Abnahmekriterium.
@@ -54,7 +81,7 @@ Alle Tests müssen grün sein — die Suite ist das Abnahmekriterium.
 
 - **mTLS-only** auf beiden Endpunkten — keine anonyme Mode, keine Bypass-Flags.
 - **mTLS terminiert in der Anwendung** (k8s: TLSRoute / ssl-passthrough), nicht am Edge-Proxy (ADR-0009).
-- **Tri-State:** Transportfehler ist `unknown` (503), nie `found:false` (ADR-0005).
+- **Tri-State:** Transportfehler ist clientseitig `unknown`, nie `found:false` (ADR-0005).
 - **Tolerantes Matching:** exakte Regel-S-Basis, suffixlos erlaubt; kürzere Query als Portfolio-Serial → `found:false` (Anti-Enumeration, ADR-0004/-0012).
 - **Write-once:** Serial↔MSB ändert sich nie (ADR-0006).
 - **Idempotenz:** Provisioning auf `(serial, ship_id)` (ADR-0006).

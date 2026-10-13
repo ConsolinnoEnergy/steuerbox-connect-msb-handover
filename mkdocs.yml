@@ -19,6 +19,7 @@ nav:
   - Spezifikation: spec/index.md
   - Sicherheit & Trust: security.md
   - Testen & Konformanz: testen.md
+  - Entwicklung & Synchronisation: entwicklung.md
   - Glossar: glossar.md
   - ADRs: adr/index.md
   - Vertiefung:

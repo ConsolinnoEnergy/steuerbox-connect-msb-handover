@@ -1,0 +1,107 @@
+# Local backend-to-backend simulation. Published ports are restricted to loopback.
+x-build: &build
+  build: { context: ../.., dockerfile: deploy/compose/Dockerfile }
+  restart: "no"
+
+services:
+  wellknown:
+    <<: *build
+    command: wellknown
+    volumes:
+      - ../../test/ca/out/wellknown-chain.pem:/certs/wellknown-chain.pem:ro
+      - ../../test/ca/out/wellknown-key.pem:/certs/wellknown-key.pem:ro
+      - ../../test/ca/out/client-ca-cert.pem:/certs/client-ca-cert.pem:ro
+    networks:
+      default:
+        aliases: [wellknown.local]
+    environment:
+      WK_BIND: 0.0.0.0:19443
+      WK_TLS_CERT: /certs/wellknown-chain.pem
+      WK_TLS_KEY: /certs/wellknown-key.pem
+      WK_CLIENT_CA_PEM: /certs/client-ca-cert.pem
+      WK_IANA_PEN: "12345"
+    ports: ["127.0.0.1:19443:19443"]
+
+  msb:
+    <<: *build
+    command: msb
+    volumes: &msb-certs
+      - ../../test/ca/out/msb-chain.pem:/certs/msb-chain.pem:ro
+      - ../../test/ca/out/msb-key.pem:/certs/msb-key.pem:ro
+      - ../../test/ca/out/pins:/certs/pins:ro
+    environment: &msb-env
+      MSB_BIND: 0.0.0.0:18443
+      MSB_ADMIN_BIND: 0.0.0.0:18444
+      MSB_ADMIN_TOKEN: admin-test-token
+      MSB_TLS_CERT: /certs/msb-chain.pem
+      MSB_TLS_KEY: /certs/msb-key.pem
+      MSB_CLIENT_CA_DIR: /certs/pins
+      MSB_MSB_ID: msb-reference
+      MSB_INVENTORY: '{"SNTEST0001":{"ship_id":"i:51593_u:SNTEST0001","ski":"SNTESTSKIGCPH0001"},"SNTEST0002":{"ship_id":"i:51593_u:SNTEST0002","ski":"SNTESTSKIGCPH0002"}}'
+      MSB_IANA_PEN: "12345"
+      MSB_BOX_ADMIN_URL: http://box-mock:18642
+      MSB_BOX_ADMIN_TOKEN: box-admin-token
+      MSB_RATE_LIMIT: "10000"
+    ports: ["127.0.0.1:18443:18443", "127.0.0.1:18444:18444"]
+    networks:
+      default:
+        aliases: [msb.local]
+
+  msb-ratelimit:
+    <<: *build
+    command: msb
+    volumes: *msb-certs
+    environment:
+      <<: *msb-env
+      MSB_BIND: 0.0.0.0:18453
+      MSB_ADMIN_BIND: 0.0.0.0:18454
+      MSB_RATE_LIMIT: "3"
+    ports: ["127.0.0.1:18453:18453"]
+
+  box-mock:
+    <<: *build
+    command: box-mock
+    environment:
+      BOX_SERIAL: SNTEST0001
+      BOX_TYPE: GCPH
+      BOX_PEN: "51593"
+      BOX_SKI: SNTESTSKIGCPH0001
+      BOX_SHIP_PORT: "19543"
+      BOX_ADMIN_PORT: "18642"
+      BOX_ADMIN_TOKEN: box-admin-token
+    ports: ["127.0.0.1:18642:18642", "127.0.0.1:19543:19543"]
+
+  hems-mock:
+    <<: *build
+    command: hems-mock
+    volumes:
+      - ../../test/ca/out/ems-qr-pub.pem:/certs/ems-qr-pub.pem:ro
+    environment:
+      HEMS_BIND: 0.0.0.0:18643
+      HEMS_SERIAL: SNTEST_HEMS-0001
+      HEMS_LOCAL_SKI: SNTESTLOCASKI0001
+      HEMS_TXT_RECORD: '["type=GCPH","ski=SNTESTSKIGCPH0001","serial","register=false","path=/ship/","model=Control Module","id=i:51593_u:SNTEST0001","cat=1","brand=Test Smart Energy GmbH","txtvers=1"]'
+      EMS_QR_PUB_PEM: /certs/ems-qr-pub.pem
+    ports: ["127.0.0.1:18643:18643"]
+
+  ems-backend:
+    <<: *build
+    command: ems-backend
+    volumes:
+      - ../../test/ca/out/server-roots.pem:/certs/server-roots.pem:ro
+      - ../../test/ca/out/client-cert.pem:/certs/client-cert.pem:ro
+      - ../../test/ca/out/client-key.pem:/certs/client-key.pem:ro
+      - ../../test/ca/out/ems-qr-key.pem:/certs/ems-qr-key.pem:ro
+      - ../../test/ca/out/backend-pins:/pins:rw
+    environment:
+      EMS_PLATFORM_URLS: https://msb.local:18443
+      EMS_ROOT_BUNDLE: /certs/server-roots.pem
+      EMS_CLIENT_CERT: /certs/client-cert.pem
+      EMS_CLIENT_KEY: /certs/client-key.pem
+      EMS_WELLKNOWN_URL: https://wellknown.local:19443
+      EMS_HEMS_URL: http://hems-mock:18643
+      EMS_QR_KEY: /certs/ems-qr-key.pem
+      EMS_CLIENT_CA_PIN: /pins/client-ca.pin
+      EMS_AUDIT_LOG: /tmp/audit.jsonl
+      RUST_LOG: info
+    profiles: [oneshot]

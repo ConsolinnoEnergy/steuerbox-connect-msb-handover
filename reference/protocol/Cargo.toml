@@ -1,0 +1,11 @@
+[package]
+name = "steuerbox-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+runtime = ["dep:tokio"]
+
+[dependencies]
+tokio = { workspace = true, optional = true }

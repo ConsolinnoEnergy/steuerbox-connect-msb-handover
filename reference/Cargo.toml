@@ -1,8 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
+    "protocol",
     "msb-core",
     "msb",
+    "ems-backend",
+    "wellknown",
+    "box-mock",
+    "hems-mock",
+    "e2e",
 ]
 
 [workspace.package]
@@ -28,3 +34,10 @@ sha2 = "0.10"
 hex = "0.4"
 async-trait = "0.1"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-manual-roots", "rustls-tls-webpki-roots", "json"] }
+rcgen = "0.13"
+rand = "0.8"
+thiserror = "2"
+zeroize = "1"
+url = "2"
+rsa = { version = "0.9", features = ["sha2", "pem"] }
+base64 = "0.22"

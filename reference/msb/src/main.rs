@@ -69,5 +69,10 @@ fn main() -> anyhow::Result<()> {
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;
-    rt.block_on(async move { msb_core::api::serve(state, api_bind, admin_bind).await })
+    rt.block_on(async move {
+        tokio::select! {
+            result = msb_core::api::serve(state, api_bind, admin_bind) => result,
+            _ = steuerbox_protocol::shutdown_signal() => Ok(()),
+        }
+    })
 }

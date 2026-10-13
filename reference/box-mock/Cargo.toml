@@ -1,0 +1,25 @@
+[package]
+name = "box-mock"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+steuerbox-protocol = { path = "../protocol", version = "0.1.0", features = ["runtime"] }
+axum.workspace = true
+tokio.workspace = true
+tokio-rustls.workspace = true
+rustls.workspace = true
+rustls-pki-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+hyper.workspace = true
+hyper-util = { version = "0.1", features = ["tokio"] }
+tower = { workspace = true, features = ["util"] }
+rcgen.workspace = true
+sha2.workspace = true
+hex.workspace = true
+rand.workspace = true

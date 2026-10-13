@@ -38,7 +38,7 @@ Entwicklerfreundliche REST-API-Beschreibung mit Payloads und Responses:
   `pairing_dataset` trägt keine separate Serial mehr (ADR-0017).
 
 Beispiel aus dem Feld (TXT-Record, wertloser `serial`-Key): die Serial steckt in
-`id=VPID` → `i:51593_u:GTHE0100045088`; HEMS-Serials haben das Format `1U0022_CO-4206`;
+`id=VPID` → `i:51593_u:SNTESTGCPH0001`; eine synthetische HEMS-Serial ist `SNTEST_HEMS-0001`;
 der QR-Inhalt ist ein SHIP-String (`SHIP;SKI:…;ID:…;FPH256:…;ENDSHIP;`) und enthält
 **nur lokale HEMS-Daten**.
 

@@ -30,7 +30,7 @@ paths:
             schema: { $ref: "#/components/schemas/ProvisioningRequest" }
             examples:
               provisioningRequest:
-                $ref: "./examples/provisioning-request.json"
+                externalValue: "./examples/provisioning-request.json"
       responses:
         "202":
           description: >

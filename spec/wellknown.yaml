@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: steuerbox-connect — Well-known API (EMS manufacturer)
+  version: 0.4.0
+  description: Public server-TLS endpoint publishing the manufacturer's dedicated client CA.
+paths:
+  /.well-known/steuerbox-connect/v1:
+    get:
+      operationId: getWellknownDocument
+      security: []
+      responses:
+        "200":
+          description: Manufacturer fleet identifier and client CA publication.
+          content:
+            application/json:
+              schema:
+                $ref: ./wellknown.schema.json
+              examples:
+                publication:
+                  externalValue: ./examples/wellknown-v1.json

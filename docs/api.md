@@ -80,9 +80,9 @@ deterministisch, ADR-0012); der **Schreib**-Aufruf braucht immer sie.
 ```json
 {
   "pairing_dataset": {
-    "ship_id": "i:0002_u:1U0022_CO-4206",
+    "ship_id": "i:12345_u:SNTEST_HEMS-0001",
     "ski": "8pGzaOi1OYDGG0ZFrPMyXjja9dM=",
-    "qr_info": "SHIP;SKI:6ADFA10E…;ID:ExampleEMS-Leaflet-HEMS-1u0022-co-4206;BRAND:ExampleEMS;TYPE:EnergyManagementSystem;MODEL:Leaflet-HEMS;SERIAL:1u0022-co-4206;CAT:2;FPH256:7EFB1B40…;SPSEC:SPSEC-EXAMPLE-REPLACE-IN-PROD;ENDSHIP;"
+    "qr_info": "SHIP;SKI:SNTESTHEMSSKI0001;ID:i:12345_u:SNTEST_HEMS-0001;BRAND:ExampleEMS;TYPE:EnergyManagementSystem;MODEL:Reference-HEMS;SERIAL:SNTEST_HEMS-0001;CAT:2;FPH256:0000000000000000000000000000000000000000000000000000000000000001;SPSEC:SPSEC-EXAMPLE-REPLACE-IN-PROD;ENDSHIP;"
   },
   "box_evidence": {
     "ship_id": "i:0001_u:SNTEST0001",

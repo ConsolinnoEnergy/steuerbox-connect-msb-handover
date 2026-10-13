@@ -16,7 +16,7 @@ Template: **Nummer · Status · Context · Decision · Consequences.**
 | [0005](0005-tri-state.md) | Tri-state semantics — transport failure is `unknown` | Accepted (clarified 2026-09-25) |
 | [0006](0006-idempotency-write-once.md) | Idempotency on `(serial, ship_id)`; write-once | Accepted |
 | [0007](0007-box-evidence.md) | `box_evidence` verification, `422 box_mismatch` + alarm | Accepted |
-| [0008](0008-secret-transport.md) | No SHIP secret via the API — admin channel only | Accepted |
+| [0008](0008-secret-transport.md) | SHIP secrets transported by mTLS and forwarded only through the admin channel | Accepted |
 | [0009](0009-mtls-in-app-termination.md) | mTLS terminates inside the application | Accepted |
 | [0010](0010-rate-limits-contract.md) | Rate limits are contract (`429` + truthful `Retry-After`) | Accepted |
 | [0011](0011-mdns-policy-closed-loop.md) | mDNS golden-record policy; closed loop as success proof | Accepted |
@@ -27,6 +27,7 @@ Template: **Nummer · Status · Context · Decision · Consequences.**
 | [0016](0016-manufacturer-id.md) | Publicly registered manufacturer identifier instead of self-chosen `manufacturer_id` | Superseded by ADR-0018 (2026-10-10) |
 | [0017](0017-slim-provisioning-payload.md) | Slim provisioning payload — `pairing_dataset {ship_id, ski, qr_info}` only | Accepted |
 | [0018](0018-iana-pen-fleet-binding.md) | `iana_pen` in the well-known document replaces the registered manufacturer identifier; fleet binding on provisioning (`422 fleet_mismatch`) | Accepted (2026-10-10, supersedes ADR-0016) |
+| [0019](0019-public-reference-submodule.md) | Standalone public workspace, synthetic fixtures and pinned GitHub submodule | Accepted |
 
 ## Themen, die einen neuen ADR erfordern
 

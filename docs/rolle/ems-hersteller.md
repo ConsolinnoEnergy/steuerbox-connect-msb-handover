@@ -9,8 +9,8 @@ HEMS-Geräte mit Steuerboxen zu ermöglichen.
 |---|---|---|
 | Well-known-Endpunkt (Client-CA-Publikation) | bei Ihnen | Ja — `spec/wellknown.schema.json` |
 | Client-CA (dedizierte Sub-CA, `scope: steuerbox-connect-api`) | bei Ihnen | Ja |
-| EMS-Backend (Discovery + Provisioning-Client) | bei Ihnen | Ja — Referenz: `src/ems-backend/` |
-| HEMS-Gerät (LAN-Erkennung, Gerätee-Token) | bei Ihnen | Referenz-Verhalten: `src/hems-mock/` |
+| EMS-Backend (Discovery + Provisioning-Client) | bei Ihnen | Ja — Referenz: `reference/ems-backend/` |
+| HEMS-Gerät (LAN-Erkennung, Gerätee-Token) | bei Ihnen | Referenz-Verhalten: `reference/hems-mock/` |
 
 ## 1. Well-known-Endpunkt bereitstellen
 
@@ -76,7 +76,7 @@ ausschließlich über den Admin-Kanal des MSB.
 
 - mDNS-Browse auf `_ship._tcp`, Filter Gateway-Klasse: ship_id + SKI der Steuerbox.
 - Serial-Derivation nach **Regel S** aus dem TXT-Record (`id=VPID`, z. B.
-  `i:51593_u:GTHE0100045088`): split am ersten `-`, keine Hyphen in kanonischen Serials.
+   `i:51593_u:SNTESTGCPH0001`): split am ersten `-`, keine Hyphen in kanonischen Serials.
 - Meldung an Ihr Backend: eigene EEBUS-Daten + Box-ship_id (enthält die
   herstellerübergreifende ID) + Box-SKI, mit Gerätee-Token authentifiziert.
 - Nach der Bestätigung des Provisioning-Status: SHIP-Retry-Loop gegenüber der Steuerbox —
@@ -95,4 +95,4 @@ beginnt der Zero-Touch-Bootstrap (s. [Prozess](../prozess.md), Schritte 4–8).
 - Gegen die Referenz: `make e2e` und `make conformance TARGET=<msb-staging-url>`.
 - Die Black-Box-Suite (`conformance/`) prüft *Ihre* Client-Implementierung nicht direkt —
   sie prüft MSBs. Für Ihre Client-Seite gilt die e2e-Suite als Akzeptanzkriterium; die
-  Referenz-Implementierung `src/ems-backend/` ist normativ.
+  Referenz-Verhalten: `reference/ems-backend/`.

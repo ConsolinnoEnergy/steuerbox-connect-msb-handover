@@ -18,3 +18,9 @@ Cargo.lock.orig
 *private*.pem
 test/ca/out/
 .env
+*key.pem
+*.csr
+*.srl
+*.pin
+site/
+.ruff_cache/

@@ -26,7 +26,8 @@ paths:
         - name: serial
           in: path
           required: true
-          schema: { type: string, minLength: 4, maxLength: 32 }
+          schema: { type: string, minLength: 1 }
+          description: Serial or complete suffixed VPID; short prefix queries are valid requests returning 404.
       responses:
         "200":
           description: >

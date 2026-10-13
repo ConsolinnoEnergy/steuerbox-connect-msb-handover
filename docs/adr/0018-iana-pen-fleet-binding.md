@@ -11,11 +11,11 @@ ADR-0016 hatte eine öffentlich registrierte Herstellerkennung im Well-known-Dok
 verankert, die auf der Flag-Kennung des Geräteherstellers nach IEC 62056 basierte.
 Diese Kennung setzt voraus, dass jedes EMS die herstellerübergreifende
 Identifikationsnummer verwendet — das ist heute nicht der Fall: EMS-Hersteller fahren
-ihre eigene, zulässige Seriennummernformat-Flotte (z. B. `1U0022_CO-4206` als VPID in
+ihre eigene, zulässige Seriennummernformat-Flotte (z. B. `SNTEST_HEMS-0001` als VPID in
 der SHIP-ID).
 
 Die SHIP-ID bleibt vom Format her `i:<IANA-PEN>_u:<VPID>` — der `i:`-Teil trägt die
-**IANA PEN des Geräteherstellers** (Consolinno: **12345**), der `_u:`-Teil die
+**IANA PEN des Geräteherstellers** (synthetisches Beispiel: **12345**), der `_u:`-Teil die
 herstellereigene Seriennummer (VPID).
 
 ## Entscheidung

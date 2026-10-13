@@ -7,7 +7,8 @@ payloads, write-once.
 
 ```bash
 make conformance TARGET=https://msb-staging.example
+make conformance-local  # fresh local reference stack; no skipped rate-limit tests
 ```
 
-Structure: one pytest file per normative property; scenarios mirror `test/e2e`.
+Structure: one pytest file per normative property; scenarios mirror `reference/e2e`.
 The reference MSB must always pass this suite (CI gate).

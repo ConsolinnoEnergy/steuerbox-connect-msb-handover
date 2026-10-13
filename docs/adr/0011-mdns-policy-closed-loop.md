@@ -1,6 +1,6 @@
 # ADR-0011: mDNS reliability via golden records; closed loop is the only success proof
 
-- **Status:** Accepted
+- **Status:** Accepted; network-mode description superseded by [ADR-0019](0019-public-reference-submodule.md).
 - **Context:** The e2e suite runs with real mDNS by default; flaky runners must not
   weaken the parser. LAN claims (mDNS TXT) are untrusted input.
 - **Decision:** Two policies, non-negotiable:

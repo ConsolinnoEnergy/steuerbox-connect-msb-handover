@@ -2,15 +2,15 @@
 
 Normative Grundlage: `spec/discovery.yaml`.
 Diese Seite vertieft die Matching-Semantik, die Serial-Ableitung und die
-Enumeration-Schutzregeln. Referenz-Implementierung: `src/msb/` (Portfolio-Store,
+Enumeration-Schutzregeln. Referenz-Implementierung: `reference/msb-core/` (Portfolio-Store,
 toleranter Matcher), Parser-Golden-Records: `fixtures/golden/`.
 
 ## Zwei Serials, nie vermischt
 
 | Kontext | Serial | Beispiel |
 |---|---|---|
-| Pfad/Query der MSB-API | **Steuerbox-Serial** | `GTHE0100045088` |
-| `pairing_dataset.serial` | **HEMS-Serial** | `1U0022_CO-4206` |
+| Pfad/Query der MSB-API | **Steuerbox-Serial** | `SNTESTGCPH0001` |
+| SHIP-Datensatz in `pairing_dataset.qr_info` | **HEMS-Serial** | `SNTEST_HEMS-0001` |
 
 Beide dürfen nie vermischt werden. Die Provisionierung schreibt **ausschließlich** auf
 die kanonische Serial — mit Status-Code-Discovery (200/404, leerer Body) leitet der
@@ -22,8 +22,8 @@ Die Steuerbox annonciert sich per mDNS (`_ship._tcp`). Real beobachtete TXT-Reco
 haben einen wertlosen `serial`-Key; die Serial steckt im `id`-Feld als VPID:
 
 ```text
-id=i:51593_u:GTHE0100045088        → Serial: GTHE0100045088
-id=i:51593_u:GTHE0100045088-KW47   → Serial: GTHE0100045088 (Suffix -KWW entfernt)
+id=i:51593_u:SNTESTGCPH0001        → Serial: SNTESTGCPH0001
+id=i:51593_u:SNTESTGCPH0001-X9     → Serial: SNTESTGCPH0001 (Suffix -X9 entfernt)
 ```
 
 Ableitung: Split am **ersten** `-` (Suffix optional; ohne Hyphen → ganzer String).

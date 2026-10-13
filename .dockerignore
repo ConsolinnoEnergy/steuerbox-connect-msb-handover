@@ -1,0 +1,10 @@
+.git
+**/target
+**/__pycache__
+.venv
+.env
+test/ca/out
+site
+*.key
+*key.pem
+*private*.pem

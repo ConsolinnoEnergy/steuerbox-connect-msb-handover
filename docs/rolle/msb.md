@@ -68,7 +68,7 @@ Nach akzeptierter Provisionierung schreiben Sie die EEBUS-Daten des EMS auf die 
 - **bei SMGWv2 via TAF** am SMGW,
 
 und richten die Steuerung über EEBUS ein. Das Repo liefert dafür nur den
-Prozesskontext und den Admin-Kanal-Adapter-Trait in der Referenz (`src/msb/`); die
+Prozesskontext und den Admin-Kanal-Adapter-Trait in der Referenz (`reference/msb-core/`); die
 tatsächliche SMGW-/TAF-Integration ist Ihr Teil.
 
 Der Secret-Transport ist zweiteilig (ADR-0008): Der QR-Info-Datensatz **inkl.
@@ -127,4 +127,4 @@ make conformance TARGET=https://ihr-msb-staging.example
 
 Geprüft (black-box): mTLS erzwungen, Fehlertaxonomie, Tri-State, tolerantes Matching +
 Anti-Enumeration, Idempotenz, `429` + `Retry-After`, `422 box_mismatch`, Secret-Freiheit,
-Write-once. Die Referenz-Implementierung (`src/msb/`) besteht dieselbe Suite in CI.
+Write-once. Die Referenz-Implementierung (`reference/msb/`) besteht dieselbe Suite in CI.
