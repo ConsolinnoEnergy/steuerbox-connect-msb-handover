@@ -31,12 +31,8 @@ def client(target) -> requests.Session:
     cert, key = os.environ.get("CONF_CERT"), os.environ.get("CONF_KEY")
     if cert and key:
         s.cert = (cert, key)
-    root = os.environ.get("CONF_ROOT")
-    if root:
-        s.verify = root
-    else:
-        # self-signed test targets: accept, mTLS is what we test
-        s.verify = False
+    # Custom test CAs need CONF_ROOT; otherwise use the default trusted roots.
+    s.verify = os.environ.get("CONF_ROOT") or True
     return s
 
 

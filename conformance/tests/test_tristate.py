@@ -26,7 +26,7 @@ def test_dead_target_is_transport_failure_not_found_false():
     import requests
 
     try:
-        r = requests.get("https://127.0.0.1:1/v1/serials/SNCONF9999", verify=False, timeout=3)
+        r = requests.get("https://127.0.0.1:1/v1/serials/SNCONF9999", timeout=3)
     except requests.exceptions.RequestException:
         return  # transport failure — client derives `unknown`; correct
     assert r.status_code != 404, (

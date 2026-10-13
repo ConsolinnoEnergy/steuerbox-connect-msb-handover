@@ -3,14 +3,19 @@ certificate must never produce a decidable API answer — it is a transport fail
 (client-side `unknown`), never `found:false`."""
 
 
-def test_no_client_cert_is_transport_error(target, serial):
+def test_no_client_cert_is_transport_error(client, target, serial):
     import requests
-    import urllib3
 
-    urllib3.disable_warnings()
+    # Establish that the target is reachable with a trusted server certificate
+    # and valid client credentials before testing rejection of an anonymous client.
+    url = f"{target}/v1/serials/{serial}"
+    client.get(url, timeout=10).raise_for_status()
     try:
-        resp = requests.get(f"{target}/v1/serials/{serial}", verify=False, timeout=10)
-    except requests.exceptions.SSLError:
+        resp = requests.get(url, verify=client.verify, timeout=10)
+    except requests.exceptions.SSLError as exc:
+        assert "CERTIFICATE_VERIFY_FAILED" not in str(exc), (
+            f"server certificate verification failed, not client authentication: {exc}"
+        )
         return  # correct: TLS handshake without client cert is rejected
     # some TLS stacks accept then 40x at HTTP level — that is a violation only if the
     # answer is decidable discovery content
